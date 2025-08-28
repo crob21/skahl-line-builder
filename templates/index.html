@@ -228,9 +228,17 @@
             backdrop-filter: blur(10px);
         }
 
-        .bench h2 {
+        .bench h2, .spares h2 {
             margin-bottom: 15px;
             text-align: center;
+        }
+
+        .spares {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
         }
 
         .ice-rink {
@@ -345,6 +353,15 @@
             padding: 4px 8px;
         }
 
+        .spare-player {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border: 1px solid #e55a2b;
+        }
+
+        .spare-player:hover {
+            background: linear-gradient(135deg, #e55a2b, #e8690b);
+        }
+
         .player-name {
             font-weight: bold;
             margin-bottom: 2px;
@@ -441,15 +458,17 @@
             <div class="player-management">
                 <h3>👥 Player Management</h3>
                 <div class="add-player-form">
-                    <input type="text" id="playerName" placeholder="Player Name" maxlength="20">
+                    <input type="text" id="playerName" placeholder="Player Name" maxlength="30">
+                    <input type="text" id="jerseyNumber" placeholder="Jersey #" maxlength="3" style="width: 80px;">
                     <select id="playerPosition">
-                        <option value="C">Center</option>
-                        <option value="LW">Left Wing</option>
-                        <option value="RW">Right Wing</option>
-                        <option value="LD">Left Defense</option>
-                        <option value="RD">Right Defense</option>
-                        <option value="G">Goalie</option>
+                        <option value="FORWARD">Forward</option>
+                        <option value="DEFENSE">Defense</option>
+                        <option value="GOALIE">Goalie</option>
                     </select>
+                    <label style="display: flex; align-items: center; gap: 5px; color: white;">
+                        <input type="checkbox" id="isAffiliate" style="margin: 0;">
+                        Affiliate Player
+                    </label>
                     <button onclick="addPlayer()">Add Player</button>
                     <button onclick="addSamplePlayers()" style="background: #28a745;">Add Sample Players</button>
                     <button onclick="printLines()" style="background: #dc3545;">🖨️ Print Lines</button>
@@ -461,6 +480,11 @@
             <div class="bench">
                 <h2>🪑 Bench</h2>
                 <div id="benchPlayers"></div>
+            </div>
+            
+            <div class="spares">
+                <h2>🔄 Spares</h2>
+                <div id="sparePlayers"></div>
             </div>
 
             <div class="ice-rink">
@@ -569,6 +593,8 @@
         async function addPlayer() {
             const name = document.getElementById('playerName').value.trim();
             const position = document.getElementById('playerPosition').value;
+            const jerseyNumber = document.getElementById('jerseyNumber').value.trim();
+            const isAffiliate = document.getElementById('isAffiliate').checked;
             
             if (!name) {
                 alert('Please enter a player name');
@@ -578,13 +604,20 @@
             const response = await fetch('/api/players', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, position })
+                body: JSON.stringify({ 
+                    name, 
+                    position, 
+                    jersey_number: jerseyNumber,
+                    affiliate: isAffiliate
+                })
             });
             
             const result = await response.json();
             
             if (result.success) {
                 document.getElementById('playerName').value = '';
+                document.getElementById('jerseyNumber').value = '';
+                document.getElementById('isAffiliate').checked = false;
                 loadPlayers();
             } else {
                 alert(result.message);
@@ -592,30 +625,17 @@
         }
 
         async function addSamplePlayers() {
-            const samplePlayers = [
-                { name: 'Connor McDavid', position: 'C' },
-                { name: 'Alex Ovechkin', position: 'LW' },
-                { name: 'David Pastrnak', position: 'RW' },
-                { name: 'Erik Karlsson', position: 'LD' },
-                { name: 'Cale Makar', position: 'RD' },
-                { name: 'Igor Shesterkin', position: 'G' },
-                { name: 'Sidney Crosby', position: 'C' },
-                { name: 'Brad Marchand', position: 'LW' },
-                { name: 'Mitch Marner', position: 'RW' },
-                { name: 'Victor Hedman', position: 'LD' },
-                { name: 'Aaron Ekblad', position: 'RD' },
-                { name: 'Frederik Andersen', position: 'G' }
-            ];
+            // Load the Jackalopes team from CSV
+            const response = await fetch('/api/teams/load-jackalopes');
+            const result = await response.json();
             
-            for (const player of samplePlayers) {
-                await fetch('/api/players', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(player)
-                });
+            if (result.success) {
+                alert('Jackalopes team loaded successfully!');
+                loadPlayers();
+                loadLines();
+            } else {
+                alert('Error loading Jackalopes team: ' + result.message);
             }
-            
-            loadPlayers();
         }
 
         async function removePlayer(playerId) {
@@ -634,7 +654,9 @@
             const players = await response.json();
             
             const benchDiv = document.getElementById('benchPlayers');
+            const sparesDiv = document.getElementById('sparePlayers');
             benchDiv.innerHTML = '';
+            sparesDiv.innerHTML = '';
             
             // Get players currently in lines
             const linesResponse = await fetch('/api/lines');
@@ -647,23 +669,36 @@
                 });
             });
             
-            // Show only bench players
-            const benchPlayers = players.filter(p => !playersInLines.has(p.id));
+            // Separate regular players and spares
+            const regularPlayers = players.filter(p => !playersInLines.has(p.id) && !p.affiliate);
+            const sparePlayers = players.filter(p => !playersInLines.has(p.id) && p.affiliate);
             
-            benchPlayers.forEach(player => {
+            // Show regular bench players
+            regularPlayers.forEach(player => {
                 const playerCard = createPlayerCard(player);
                 benchDiv.appendChild(playerCard);
+            });
+            
+            // Show spare players
+            sparePlayers.forEach(player => {
+                const playerCard = createPlayerCard(player);
+                sparesDiv.appendChild(playerCard);
             });
         }
 
         function createPlayerCard(player) {
             const card = document.createElement('div');
             card.className = 'player-card';
+            if (player.affiliate) {
+                card.classList.add('spare-player');
+            }
             card.draggable = true;
             card.dataset.playerId = player.id;
+            
+            const jerseyDisplay = player.jersey_number ? `#${player.jersey_number}` : '';
             card.innerHTML = `
-                <div class="player-name">${player.name}</div>
-                <div class="player-position">${player.position}</div>
+                <div class="player-name">${player.name} ${jerseyDisplay}</div>
+                <div class="player-position">${player.roster_position || player.position}</div>
                 <button onclick="removePlayer(${player.id})" class="remove-btn">×</button>
             `;
             
@@ -708,7 +743,23 @@
             document.querySelectorAll('.position-slot').forEach(slot => {
                 slot.addEventListener('dragover', (e) => {
                     e.preventDefault();
-                    slot.style.borderColor = '#ff6b35';
+                    if (draggedPlayer) {
+                        const position = slot.dataset.position;
+                        const playerPosition = draggedPlayer.roster_position || draggedPlayer.position;
+                        
+                        // Color coding based on position suitability
+                        if (position === 'G' && playerPosition === 'GOALIE') {
+                            slot.style.borderColor = '#28a745'; // Green for perfect match
+                        } else if (position === 'G' && playerPosition !== 'GOALIE') {
+                            slot.style.borderColor = '#dc3545'; // Red for goalie position
+                        } else if ((position === 'LW' || position === 'C' || position === 'RW') && playerPosition === 'FORWARD') {
+                            slot.style.borderColor = '#28a745'; // Green for forward positions
+                        } else if ((position === 'LD' || position === 'RD') && playerPosition === 'DEFENSE') {
+                            slot.style.borderColor = '#28a745'; // Green for defense positions
+                        } else {
+                            slot.style.borderColor = '#ffc107'; // Yellow for mixed positions
+                        }
+                    }
                 });
                 
                 slot.addEventListener('dragleave', (e) => {

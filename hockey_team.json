@@ -1,69 +1,400 @@
 {
   "players": [
     {
-      "name": "Connor McDavid",
-      "position": "C",
+      "name": "Jackson Chu",
+      "first_name": "Jackson",
+      "last_name": "Chu",
+      "jersey_number": "2",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 1
     },
     {
-      "name": "Alex Ovechkin",
-      "position": "LW",
+      "name": "Bill Fraser",
+      "first_name": "Bill",
+      "last_name": "Fraser",
+      "jersey_number": "7",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 2
     },
     {
-      "name": "David Pastrnak",
-      "position": "RW",
+      "name": "Jason Sikes",
+      "first_name": "Jason",
+      "last_name": "Sikes",
+      "jersey_number": "22",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 3
     },
     {
-      "name": "Erik Karlsson",
-      "position": "LD",
+      "name": "Peter Walker",
+      "first_name": "Peter",
+      "last_name": "Walker",
+      "jersey_number": "4",
+      "roster_position": "DEFENSE",
+      "affiliate": false,
       "id": 4
     },
     {
-      "name": "Cale Makar",
-      "position": "RD",
+      "name": "Tony Zhang",
+      "first_name": "Tony",
+      "last_name": "Zhang",
+      "jersey_number": "12",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 5
     },
     {
-      "name": "Igor Shesterkin",
-      "position": "G",
+      "name": "Pat Cotter",
+      "first_name": "Pat",
+      "last_name": "Cotter",
+      "jersey_number": "16",
+      "roster_position": "FORWARD",
+      "affiliate": true,
       "id": 6
     },
     {
-      "name": "Sidney Crosby",
-      "position": "C",
+      "name": "Sumit Kamath",
+      "first_name": "Sumit",
+      "last_name": "Kamath",
+      "jersey_number": "19",
+      "roster_position": "FORWARD",
+      "affiliate": true,
       "id": 7
     },
     {
-      "name": "Brad Marchand",
-      "position": "LW",
+      "name": "JERAMEE SCHERER",
+      "first_name": "JERAMEE",
+      "last_name": "SCHERER",
+      "jersey_number": "20",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 8
     },
     {
-      "name": "Mitch Marner",
-      "position": "RW",
+      "name": "Kyle Measner",
+      "first_name": "Kyle",
+      "last_name": "Measner",
+      "jersey_number": "35",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 9
     },
     {
-      "name": "Victor Hedman",
-      "position": "LD",
+      "name": "Joshua Ehlke",
+      "first_name": "Joshua",
+      "last_name": "Ehlke",
+      "jersey_number": "29",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 10
     },
     {
-      "name": "Aaron Ekblad",
-      "position": "RD",
+      "name": "Stephen Rockwood",
+      "first_name": "Stephen",
+      "last_name": "Rockwood",
+      "jersey_number": "34",
+      "roster_position": "GOALIE",
+      "affiliate": true,
       "id": 11
     },
     {
-      "name": "Frederik Andersen",
-      "position": "G",
+      "name": "Ross Varin",
+      "first_name": "Ross",
+      "last_name": "Varin",
+      "jersey_number": "45",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 12
     },
     {
-      "name": "Craig Robinson",
-      "position": "LD",
+      "name": "Blakely Russett",
+      "first_name": "Blakely",
+      "last_name": "Russett",
+      "jersey_number": "47",
+      "roster_position": "FORWARD",
+      "affiliate": false,
       "id": 13
+    },
+    {
+      "name": "Robert Helfman",
+      "first_name": "Robert",
+      "last_name": "Helfman",
+      "jersey_number": "75",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 14
+    },
+    {
+      "name": "Matt Maisano",
+      "first_name": "Matt",
+      "last_name": "Maisano",
+      "jersey_number": "76",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 15
+    },
+    {
+      "name": "Joseph Pugmire",
+      "first_name": "Joseph",
+      "last_name": "Pugmire",
+      "jersey_number": "79",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 16
+    },
+    {
+      "name": "Mattias Lupa",
+      "first_name": "Mattias",
+      "last_name": "Lupa",
+      "jersey_number": "91",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 17
+    },
+    {
+      "name": "Kristian Lupa",
+      "first_name": "Kristian",
+      "last_name": "Lupa",
+      "jersey_number": "92",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 18
+    },
+    {
+      "name": "Tanya Raddatz",
+      "first_name": "Tanya",
+      "last_name": "Raddatz",
+      "jersey_number": "84",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 19
+    },
+    {
+      "name": "Craig Robinson",
+      "first_name": "Craig",
+      "last_name": "Robinson",
+      "jersey_number": "17",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 20
+    },
+    {
+      "name": "Joe Cudiamat",
+      "first_name": "Joe",
+      "last_name": "Cudiamat",
+      "jersey_number": "15",
+      "roster_position": "DEFENSE",
+      "affiliate": true,
+      "id": 21
+    },
+    {
+      "name": "Cameron Webber",
+      "first_name": "Cameron",
+      "last_name": "Webber",
+      "jersey_number": "10",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 22
+    },
+    {
+      "name": "Jason Kees",
+      "first_name": "Jason",
+      "last_name": "Kees",
+      "jersey_number": "74",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 23
+    },
+    {
+      "name": "Colin Kees",
+      "first_name": "Colin",
+      "last_name": "Kees",
+      "jersey_number": "3",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 24
+    },
+    {
+      "name": "Cole Jacobson",
+      "first_name": "Cole",
+      "last_name": "Jacobson",
+      "jersey_number": "97",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 25
+    },
+    {
+      "name": "Chris Park",
+      "first_name": "Chris",
+      "last_name": "Park",
+      "jersey_number": "83",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 26
+    },
+    {
+      "name": "Richard Kong",
+      "first_name": "Richard",
+      "last_name": "Kong",
+      "jersey_number": "88",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 27
+    },
+    {
+      "name": "Ryan Toth",
+      "first_name": "Ryan",
+      "last_name": "Toth",
+      "jersey_number": "2",
+      "roster_position": "GOALIE",
+      "affiliate": false,
+      "id": 28
+    },
+    {
+      "name": "Lisa Giles",
+      "first_name": "Lisa",
+      "last_name": "Giles",
+      "jersey_number": "99",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 29
+    },
+    {
+      "name": "Devin Iverson",
+      "first_name": "Devin",
+      "last_name": "Iverson",
+      "jersey_number": "100",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 30
+    },
+    {
+      "name": "Nathan Woodward",
+      "first_name": "Nathan",
+      "last_name": "Woodward",
+      "jersey_number": "30",
+      "roster_position": "GOALIE",
+      "affiliate": true,
+      "id": 31
+    },
+    {
+      "name": "Jin Lee",
+      "first_name": "Jin",
+      "last_name": "Lee",
+      "jersey_number": "18",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 32
+    },
+    {
+      "name": "Rob Antolin",
+      "first_name": "Rob",
+      "last_name": "Antolin",
+      "jersey_number": "99",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 33
+    },
+    {
+      "name": "Jayme Woods",
+      "first_name": "Jayme",
+      "last_name": "Woods",
+      "jersey_number": "98",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 34
+    },
+    {
+      "name": "Randall Donajkowski",
+      "first_name": "Randall",
+      "last_name": "Donajkowski",
+      "jersey_number": "11",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 35
+    },
+    {
+      "name": "Jason Michel",
+      "first_name": "Jason",
+      "last_name": "Michel",
+      "jersey_number": "16",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 36
+    },
+    {
+      "name": "Tyler Miller",
+      "first_name": "Tyler",
+      "last_name": "Miller",
+      "jersey_number": "14",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 37
+    },
+    {
+      "name": "Randy Woloshin",
+      "first_name": "Randy",
+      "last_name": "Woloshin",
+      "jersey_number": "94",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 38
+    },
+    {
+      "name": "Evan Philips",
+      "first_name": "Evan",
+      "last_name": "Philips",
+      "jersey_number": "24",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 39
+    },
+    {
+      "name": "Kevin Ehlers",
+      "first_name": "Kevin",
+      "last_name": "Ehlers",
+      "jersey_number": "8",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 40
+    },
+    {
+      "name": "Ilya Ivanov",
+      "first_name": "Ilya",
+      "last_name": "Ivanov",
+      "jersey_number": "3",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 41
+    },
+    {
+      "name": "Bradley Rebh",
+      "first_name": "Bradley",
+      "last_name": "Rebh",
+      "jersey_number": "7",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 42
+    },
+    {
+      "name": "X Ferens",
+      "first_name": "X",
+      "last_name": "Ferens",
+      "jersey_number": "68",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 43
+    },
+    {
+      "name": "KEVIN EHLERS",
+      "first_name": "KEVIN",
+      "last_name": "EHLERS",
+      "jersey_number": "98",
+      "roster_position": "FORWARD",
+      "affiliate": true,
+      "id": 44
     }
   ],
   "lines": {
@@ -77,11 +408,7 @@
     },
     "2": {
       "LW": null,
-      "C": {
-        "name": "Craig Robinson",
-        "position": "LD",
-        "id": 13
-      },
+      "C": null,
       "RW": null,
       "LD": null,
       "RD": null,
@@ -96,5 +423,5 @@
       "G": null
     }
   },
-  "last_updated": "2025-08-27T19:50:47.007314"
+  "last_updated": "2025-08-27T19:57:55.182761"
 }

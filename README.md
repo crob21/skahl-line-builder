@@ -100,7 +100,9 @@ Alex Ovechkin,LW
 David Pastrnak,RW
 ```
 
-Valid positions: C, LW, RW, LD, RD, G
+Valid positions: FORWARD, DEFENSE, GOALIE
+
+**Note**: Players are listed with their roster position (FORWARD, DEFENSE, GOALIE) but can be placed in any specific position (LW, C, RW, LD, RD, G) when building lines. This gives you flexibility to move players around based on game situations.
 
 ## License
 

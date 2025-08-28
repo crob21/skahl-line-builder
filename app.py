@@ -41,13 +41,13 @@ class HockeyTeamManager:
         if any(p["name"].lower() == name.lower() for p in self.players):
             return {"success": False, "message": f"{name} already exists"}
         
-        valid_positions = ["C", "LW", "RW", "LD", "RD", "G"]
+        valid_positions = ["FORWARD", "DEFENSE", "GOALIE"]
         if position.upper() not in valid_positions:
             return {"success": False, "message": "Invalid position"}
         
         player = {
             "name": name.strip(),
-            "position": position.upper(),
+            "roster_position": position.upper(),
             "jersey_number": jersey_number.strip(),
             "affiliate": affiliate,
             "id": len(self.players) + 1
@@ -184,8 +184,9 @@ def upload_team():
             affiliate = row.get('affiliate', '').strip().upper()
             
             if last_name and first_name and position:
-                valid_positions = ["C", "LW", "RW", "LD", "RD", "G"]
-                if position in valid_positions:
+                # Map roster positions to our system
+                valid_roster_positions = ["FORWARD", "DEFENSE", "GOALIE"]
+                if position in valid_roster_positions:
                     # Create full name
                     full_name = f"{first_name} {last_name}"
                     
@@ -194,7 +195,7 @@ def upload_team():
                         "first_name": first_name,
                         "last_name": last_name,
                         "jersey_number": jersey_number,
-                        "position": position,
+                        "roster_position": position,  # FORWARD, DEFENSE, GOALIE
                         "affiliate": affiliate == "YES",
                         "id": len(manager.players) + 1
                     }
@@ -220,7 +221,7 @@ def download_team():
                 player.get('last_name', ''),
                 player.get('first_name', ''),
                 player.get('jersey_number', ''),
-                player['position'],
+                player.get('roster_position', 'FORWARD'),  # Use roster position
                 affiliate_status
             ])
         
@@ -310,6 +311,53 @@ def list_teams():
         return jsonify(teams)
     except Exception as e:
         return jsonify([])
+
+@app.route('/api/teams/load-jackalopes', methods=['GET'])
+def load_jackalopes():
+    try:
+        # Clear current team
+        manager.players = []
+        for line_num in manager.lines:
+            manager.lines[line_num] = {"LW": None, "C": None, "RW": None, 
+                                      "LD": None, "RD": None, "G": None}
+        
+        # Load Jackalopes from CSV
+        csv_path = 'sample_team.csv'
+        if os.path.exists(csv_path):
+            with open(csv_path, 'r') as f:
+                csv_reader = csv.DictReader(f)
+                
+                for row in csv_reader:
+                    last_name = row.get('last_name', '').strip()
+                    first_name = row.get('first_name', '').strip()
+                    jersey_number = row.get('jersey_number', '').strip()
+                    position = row.get('position', '').strip().upper()
+                    affiliate = row.get('affiliate', '').strip().upper()
+                    
+                    if last_name and first_name and position:
+                        valid_positions = ["FORWARD", "DEFENSE", "GOALIE"]
+                        if position in valid_positions:
+                            # Create full name
+                            full_name = f"{first_name} {last_name}"
+                            
+                            player = {
+                                "name": full_name,
+                                "first_name": first_name,
+                                "last_name": last_name,
+                                "jersey_number": jersey_number,
+                                "roster_position": position,
+                                "affiliate": affiliate == "YES",
+                                "id": len(manager.players) + 1
+                            }
+                            manager.players.append(player)
+            
+            manager.save_data()
+            return jsonify({"success": True, "message": "Jackalopes team loaded successfully!"})
+        else:
+            return jsonify({"success": False, "message": "Jackalopes CSV file not found"})
+            
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error loading Jackalopes: {str(e)}"})
 
 @app.route('/api/print-lines', methods=['GET'])
 def print_lines():
@@ -974,12 +1022,9 @@ if __name__ == '__main__':
                     <input type="text" id="playerName" placeholder="Player Name" maxlength="30">
                     <input type="text" id="jerseyNumber" placeholder="Jersey #" maxlength="3" style="width: 80px;">
                     <select id="playerPosition">
-                        <option value="C">Center</option>
-                        <option value="LW">Left Wing</option>
-                        <option value="RW">Right Wing</option>
-                        <option value="LD">Left Defense</option>
-                        <option value="RD">Right Defense</option>
-                        <option value="G">Goalie</option>
+                        <option value="FORWARD">Forward</option>
+                        <option value="DEFENSE">Defense</option>
+                        <option value="GOALIE">Goalie</option>
                     </select>
                     <label style="display: flex; align-items: center; gap: 5px; color: white;">
                         <input type="checkbox" id="isAffiliate" style="margin: 0;">
@@ -1141,32 +1186,17 @@ if __name__ == '__main__':
         }
 
         async function addSamplePlayers() {
-            const samplePlayers = [
-                { name: 'Connor McDavid', position: 'C', jersey_number: '97', affiliate: false },
-                { name: 'Alex Ovechkin', position: 'LW', jersey_number: '8', affiliate: false },
-                { name: 'David Pastrnak', position: 'RW', jersey_number: '88', affiliate: false },
-                { name: 'Erik Karlsson', position: 'LD', jersey_number: '65', affiliate: false },
-                { name: 'Cale Makar', position: 'RD', jersey_number: '8', affiliate: false },
-                { name: 'Igor Shesterkin', position: 'G', jersey_number: '31', affiliate: false },
-                { name: 'Sidney Crosby', position: 'C', jersey_number: '87', affiliate: false },
-                { name: 'Brad Marchand', position: 'LW', jersey_number: '63', affiliate: false },
-                { name: 'Mitch Marner', position: 'RW', jersey_number: '16', affiliate: false },
-                { name: 'Victor Hedman', position: 'LD', jersey_number: '77', affiliate: false },
-                { name: 'Aaron Ekblad', position: 'RD', jersey_number: '5', affiliate: false },
-                { name: 'Frederik Andersen', position: 'G', jersey_number: '31', affiliate: false },
-                { name: 'Craig Robinson', position: 'LD', jersey_number: '13', affiliate: true },
-                { name: 'John Smith', position: 'C', jersey_number: '22', affiliate: true }
-            ];
+            // Load the Jackalopes team from CSV
+            const response = await fetch('/api/teams/load-jackalopes');
+            const result = await response.json();
             
-            for (const player of samplePlayers) {
-                await fetch('/api/players', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(player)
-                });
+            if (result.success) {
+                alert('Jackalopes team loaded successfully!');
+                loadPlayers();
+                loadLines();
+            } else {
+                alert('Error loading Jackalopes team: ' + result.message);
             }
-            
-            loadPlayers();
         }
 
         async function removePlayer(playerId) {
@@ -1229,7 +1259,7 @@ if __name__ == '__main__':
             const jerseyDisplay = player.jersey_number ? `#${player.jersey_number}` : '';
             card.innerHTML = `
                 <div class="player-name">${player.name} ${jerseyDisplay}</div>
-                <div class="player-position">${player.position}</div>
+                <div class="player-position">${player.roster_position || player.position}</div>
                 <button onclick="removePlayer(${player.id})" class="remove-btn">×</button>
             `;
             
@@ -1274,7 +1304,23 @@ if __name__ == '__main__':
             document.querySelectorAll('.position-slot').forEach(slot => {
                 slot.addEventListener('dragover', (e) => {
                     e.preventDefault();
-                    slot.style.borderColor = '#ff6b35';
+                    if (draggedPlayer) {
+                        const position = slot.dataset.position;
+                        const playerPosition = draggedPlayer.roster_position || draggedPlayer.position;
+                        
+                        // Color coding based on position suitability
+                        if (position === 'G' && playerPosition === 'GOALIE') {
+                            slot.style.borderColor = '#28a745'; // Green for perfect match
+                        } else if (position === 'G' && playerPosition !== 'GOALIE') {
+                            slot.style.borderColor = '#dc3545'; // Red for goalie position
+                        } else if ((position === 'LW' || position === 'C' || position === 'RW') && playerPosition === 'FORWARD') {
+                            slot.style.borderColor = '#28a745'; // Green for forward positions
+                        } else if ((position === 'LD' || position === 'RD') && playerPosition === 'DEFENSE') {
+                            slot.style.borderColor = '#28a745'; // Green for defense positions
+                        } else {
+                            slot.style.borderColor = '#ffc107'; // Yellow for mixed positions
+                        }
+                    }
                 });
                 
                 slot.addEventListener('dragleave', (e) => {
