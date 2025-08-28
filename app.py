@@ -1560,6 +1560,7 @@ if __name__ == '__main__':
             }
             card.draggable = true;
             card.dataset.playerId = player.id;
+            card.dataset.rosterPosition = player.roster_position || player.position;
             
             const jerseyDisplay = player.jersey_number ? `#${player.jersey_number}` : '';
             card.innerHTML = `
@@ -1910,6 +1911,185 @@ if __name__ == '__main__':
             }
         }
 
+        // Click-to-select functionality
+        let selectedPlayer = null;
+        let selectedPlayerElement = null;
+
+        function setupClickToSelect() {
+            // Add click handlers to player cards
+            document.addEventListener('click', function(e) {
+                const playerCard = e.target.closest('.player-card');
+                const positionSlot = e.target.closest('.position-slot');
+                
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    // Player card clicked - select it
+                    selectPlayer(playerCard);
+                } else if (positionSlot && selectedPlayer) {
+                    // Position slot clicked with player selected - place player
+                    placePlayerInPosition(positionSlot);
+                } else if (!playerCard && !positionSlot) {
+                    // Clicked outside - deselect
+                    deselectPlayer();
+                }
+            });
+        }
+
+        function selectPlayer(playerCard) {
+            // Deselect previous player
+            deselectPlayer();
+            
+            // Select new player
+            selectedPlayer = {
+                id: parseInt(playerCard.dataset.playerId),
+                name: playerCard.querySelector('.player-name').textContent,
+                roster_position: playerCard.dataset.rosterPosition || 'FORWARD'
+            };
+            selectedPlayerElement = playerCard;
+            
+            // Visual feedback
+            playerCard.style.transform = 'scale(1.05)';
+            playerCard.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.8)';
+            playerCard.style.border = '2px solid #3b82f6';
+            
+            // Show selection indicator
+            showSelectionIndicator();
+        }
+
+        function deselectPlayer() {
+            if (selectedPlayerElement) {
+                selectedPlayerElement.style.transform = '';
+                selectedPlayerElement.style.boxShadow = '';
+                selectedPlayerElement.style.border = '';
+                selectedPlayerElement = null;
+            }
+            selectedPlayer = null;
+            hideSelectionIndicator();
+        }
+
+        function placePlayerInPosition(positionSlot) {
+            if (!selectedPlayer) return;
+            
+            const lineNum = positionSlot.dataset.line;
+            const position = positionSlot.dataset.position;
+            
+            // Check if position is suitable for player
+            const playerPosition = selectedPlayer.roster_position;
+            let isValidPosition = true;
+            let feedbackMessage = '';
+            
+            if (position === 'G' && playerPosition !== 'GOALIE') {
+                isValidPosition = false;
+                feedbackMessage = 'Only goalies can be placed in goalie position';
+            } else if ((position === 'LW' || position === 'C' || position === 'RW') && playerPosition !== 'FORWARD') {
+                isValidPosition = false;
+                feedbackMessage = 'Only forwards can be placed in forward positions';
+            } else if ((position === 'LD' || position === 'RD') && playerPosition !== 'DEFENSE') {
+                isValidPosition = false;
+                feedbackMessage = 'Only defensemen can be placed in defense positions';
+            }
+            
+            if (!isValidPosition) {
+                showFeedback(feedbackMessage, 'error');
+                return;
+            }
+            
+            // Place the player
+            setPlayerInLine(selectedPlayer.id, lineNum, position).then(() => {
+                deselectPlayer();
+                showFeedback(`Placed ${selectedPlayer.name} in ${position}`, 'success');
+            }).catch(error => {
+                showFeedback('Error placing player', 'error');
+            });
+        }
+
+        function showSelectionIndicator() {
+            // Create or update selection indicator
+            let indicator = document.getElementById('selection-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'selection-indicator';
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #3b82f6;
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    z-index: 1000;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    animation: slideIn 0.3s ease-out;
+                `;
+                document.body.appendChild(indicator);
+            }
+            indicator.textContent = `Selected: ${selectedPlayer.name}`;
+            indicator.style.display = 'block';
+            
+            // Add CSS animation
+            if (!document.getElementById('selection-animation')) {
+                const style = document.createElement('style');
+                style.id = 'selection-animation';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function hideSelectionIndicator() {
+            const indicator = document.getElementById('selection-indicator');
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function showFeedback(message, type) {
+            // Create feedback element
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 1001;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                animation: fadeInOut 2s ease-in-out;
+            `;
+            feedback.textContent = message;
+            document.body.appendChild(feedback);
+            
+            // Add CSS animation
+            if (!document.getElementById('feedback-animation')) {
+                const style = document.createElement('style');
+                style.id = 'feedback-animation';
+                style.textContent = `
+                    @keyframes fadeInOut {
+                        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                        20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Remove after animation
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.parentNode.removeChild(feedback);
+                }
+            }, 2000);
+        }
+
         // Mobile touch improvements
         function setupMobileTouch() {
             // Prevent zoom on double tap
@@ -1979,9 +2159,10 @@ if __name__ == '__main__':
             }, { passive: true });
         }
 
-        // Initialize mobile optimizations when page loads
+        // Initialize all functionality when page loads
         document.addEventListener('DOMContentLoaded', function() {
             setupMobileTouch();
+            setupClickToSelect();
         });
     </script>
 </body>
