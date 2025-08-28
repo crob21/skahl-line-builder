@@ -355,16 +355,16 @@ def print_lines():
                 .header {{ 
                     text-align: center; 
                     margin-bottom: 40px; 
-                    border-bottom: 3px solid #1e3c72;
+                    border-bottom: 3px solid #1e3a8a;
                     padding-bottom: 20px;
                 }}
                 .header h1 {{
-                    color: #1e3c72;
+                    color: #1e3a8a;
                     font-size: 28px;
                     margin-bottom: 5px;
                 }}
                 .header h2 {{
-                    color: #2a5298;
+                    color: #3b82f6;
                     font-size: 20px;
                     margin: 0;
                 }}
@@ -380,7 +380,7 @@ def print_lines():
                     font-size: 20px; 
                     font-weight: bold; 
                     margin-bottom: 15px; 
-                    color: #1e3c72;
+                    color: #1e3a8a;
                     text-align: center;
                     text-transform: uppercase;
                     letter-spacing: 1px;
@@ -392,7 +392,7 @@ def print_lines():
                     justify-content: center;
                 }}
                 .position {{ 
-                    border: 2px solid #1e3c72; 
+                    border: 2px solid #1e3a8a; 
                     padding: 12px 8px; 
                     min-width: 100px; 
                     text-align: center; 
@@ -402,7 +402,7 @@ def print_lines():
                 }}
                 .position-label {{ 
                     font-weight: bold; 
-                    color: #1e3c72; 
+                    color: #1e3a8a; 
                     margin-bottom: 8px; 
                     font-size: 12px;
                     text-transform: uppercase;
@@ -417,12 +417,12 @@ def print_lines():
                     margin-top: 15px; 
                 }}
                 .goalie-position {{
-                    border: 2px solid #ff6b35;
-                    background: #fff5f2;
+                    border: 2px solid #fbbf24;
+                    background: #fef3c7;
                     min-width: 100px;
                 }}
                 .goalie-position .position-label {{
-                    color: #ff6b35;
+                    color: #d97706;
                 }}
 
                 .empty-position {{
@@ -547,7 +547,7 @@ if __name__ == '__main__':
 
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
             color: white;
             min-height: 100vh;
             padding: 20px;
@@ -582,7 +582,7 @@ if __name__ == '__main__':
         .player-management h3 {
             margin-bottom: 20px;
             text-align: center;
-            color: #ff6b35;
+            color: #ffffff;
             font-size: 1.4rem;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
@@ -608,7 +608,7 @@ if __name__ == '__main__':
         .team-management h3 {
             margin-bottom: 20px;
             text-align: center;
-            color: #ff6b35;
+            color: #ffffff;
             font-size: 1.4rem;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
@@ -663,7 +663,7 @@ if __name__ == '__main__':
         }
 
         .team-controls select option {
-            background: #2a5298;
+            background: #1e3a8a;
             color: white;
         }
 
@@ -679,38 +679,38 @@ if __name__ == '__main__':
         }
 
         .btn-upload {
-            background: #17a2b8;
+            background: #3b82f6;
         }
 
         .btn-upload:hover {
-            background: #138496;
+            background: #2563eb;
             transform: translateY(-1px);
         }
 
         .btn-download {
-            background: #6f42c1;
+            background: #1e3a8a;
         }
 
         .btn-download:hover {
-            background: #5a32a3;
+            background: #1e40af;
             transform: translateY(-1px);
         }
 
         .btn-save {
-            background: #fd7e14;
+            background: #3b82f6;
         }
 
         .btn-save:hover {
-            background: #e8690b;
+            background: #2563eb;
             transform: translateY(-1px);
         }
 
         .btn-load {
-            background: #20c997;
+            background: #1e3a8a;
         }
 
         .btn-load:hover {
-            background: #1ba085;
+            background: #1e40af;
             transform: translateY(-1px);
         }
 
@@ -738,7 +738,7 @@ if __name__ == '__main__':
         }
 
         button {
-            background: #ff6b35;
+            background: #3b82f6;
             color: white;
             cursor: pointer;
             font-weight: bold;
@@ -746,7 +746,7 @@ if __name__ == '__main__':
         }
 
         button:hover {
-            background: #e55a2b;
+            background: #2563eb;
         }
 
         .main-content {
@@ -851,8 +851,8 @@ if __name__ == '__main__':
         }
 
         .position-slot.drag-over {
-            border-color: #ff6b35;
-            background: rgba(255,107,53,0.2);
+            border-color: #3b82f6;
+            background: rgba(59,130,246,0.2);
             transform: scale(1.05);
         }
         
@@ -891,7 +891,7 @@ if __name__ == '__main__':
         }
 
         .player-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
             border-radius: 8px;
             padding: 8px 12px;
             margin-bottom: 8px;
@@ -931,37 +931,37 @@ if __name__ == '__main__':
         }
 
         .spare-player {
-            background: linear-gradient(135deg, #ff6b35, #f7931e);
-            border: 1px solid #e55a2b;
+            background: linear-gradient(135deg, #374151, #6b7280);
+            border: 1px solid #4b5563;
         }
 
         .spare-player:hover {
-            background: linear-gradient(135deg, #e55a2b, #e8690b);
+            background: linear-gradient(135deg, #4b5563, #6b7280);
         }
         
         .player-card.goalie {
-            background: linear-gradient(135deg, #ffd700, #ffb347);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #333;
-            border: 1px solid #e6c200;
+            border: 1px solid #d97706;
         }
         
         .player-card.goalie:hover {
-            background: linear-gradient(135deg, #e6c200, #e6a800);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
         
         .spare-player.goalie {
-            background: linear-gradient(135deg, #ffd700, #ffb347);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #333;
-            border: 1px solid #e6c200;
+            border: 1px solid #d97706;
         }
         
         .spare-player.goalie:hover {
-            background: linear-gradient(135deg, #e6c200, #e6a800);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
 
         .player-card.goalie .position-indicator {
             background: #333;
-            color: #ffd700;
+            color: #fbbf24;
         }
 
         .position-indicator {
