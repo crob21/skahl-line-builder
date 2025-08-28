@@ -812,6 +812,7 @@
                     </label>
                     <button onclick="addPlayer()">Add Player</button>
                     <button onclick="printLines()" style="background: #dc3545;">🖨️ Print Lines</button>
+                    <button onclick="saveAndShareLines()" style="background: #28a745;">🔗 Save & Share Lines</button>
                 </div>
             </div>
         </div>
@@ -1223,13 +1224,33 @@
         }
 
         async function clearLine(lineNum) {
-            const response = await fetch(`/api/lines/clear/${lineNum}`, {
-                method: 'DELETE'
-            });
-            
-            if (response.ok) {
-                loadPlayers();
-                loadLines();
+            try {
+                const response = await fetch(`/api/lines/clear/${lineNum}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    // Clear the visual display immediately
+                    const lineSection = document.querySelector(`[data-line="${lineNum}"]`).closest('.line-section');
+                    lineSection.querySelectorAll('.position-slot').forEach(slot => {
+                        const positionLabel = slot.querySelector('.position-label');
+                        if (positionLabel) {
+                            slot.innerHTML = positionLabel.outerHTML;
+                        }
+                    });
+                    
+                    // Reload data
+                    await loadPlayers();
+                    await loadLines();
+                    
+                    // Show feedback
+                    showFeedback(`Line ${lineNum} cleared`, 'success');
+                } else {
+                    showFeedback('Error clearing line', 'error');
+                }
+            } catch (error) {
+                console.error('Error clearing line:', error);
+                showFeedback('Error clearing line', 'error');
             }
         }
 
@@ -1377,27 +1398,165 @@
             }
         }
 
+        async function saveAndShareLines() {
+            const lineName = prompt('Enter a name for your lines:');
+            if (!lineName || lineName.trim() === '') {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/lines/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: lineName.trim() })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Create a modal to show the share URL
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.8);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 1000;
+                    `;
+                    
+                    modal.innerHTML = `
+                        <div style="
+                            background: white;
+                            padding: 30px;
+                            border-radius: 15px;
+                            max-width: 500px;
+                            text-align: center;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                        ">
+                            <h2 style="color: #1e3a8a; margin-bottom: 20px;">🎉 Lines Saved Successfully!</h2>
+                            <p style="margin-bottom: 20px; color: #333;">Your lines "${lineName}" have been saved and can be shared with others.</p>
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; color: #666; font-weight: bold;">Share this URL:</label>
+                                <input type="text" value="${result.share_url}" readonly style="
+                                    width: 100%;
+                                    padding: 10px;
+                                    border: 2px solid #ddd;
+                                    border-radius: 5px;
+                                    font-family: monospace;
+                                    background: #f8f9fa;
+                                ">
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: center;">
+                                <button onclick="copyToClipboard('${result.share_url}')" style="
+                                    background: #28a745;
+                                    color: white;
+                                    border: none;
+                                    padding: 10px 20px;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                ">📋 Copy URL</button>
+                                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="
+                                    background: #6c757d;
+                                    color: white;
+                                    border: none;
+                                    padding: 10px 20px;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                ">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                } else {
+                    alert('Error saving lines: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error saving lines:', error);
+                alert('Error saving lines. Please try again.');
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('URL copied to clipboard!');
+            }, function(err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('URL copied to clipboard!');
+            });
+        }
+
         // Click-to-select functionality
         let selectedPlayer = null;
         let selectedPlayerElement = null;
 
         function setupClickToSelect() {
-            // Add click handlers to player cards
+            let touchStartTime = 0;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            
+            // Handle both click and touch events
             document.addEventListener('click', function(e) {
-                const playerCard = e.target.closest('.player-card');
-                const positionSlot = e.target.closest('.position-slot');
-                
-                if (playerCard && !playerCard.classList.contains('in-position')) {
-                    // Player card clicked - select it
-                    selectPlayer(playerCard);
-                } else if (positionSlot && selectedPlayer) {
-                    // Position slot clicked with player selected - place player
-                    placePlayerInPosition(positionSlot);
-                } else if (!playerCard && !positionSlot) {
-                    // Clicked outside - deselect
-                    deselectPlayer();
+                // Only handle clicks that aren't from touch events
+                if (Date.now() - touchStartTime > 300) {
+                    handleClickOrTap(e);
                 }
             });
+            
+            // Handle touch events for mobile
+            document.addEventListener('touchstart', function(e) {
+                touchStartTime = Date.now();
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            document.addEventListener('touchend', function(e) {
+                const touchEndTime = Date.now();
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                
+                // Calculate distance moved
+                const distance = Math.sqrt(
+                    Math.pow(touchEndX - touchStartX, 2) + 
+                    Math.pow(touchEndY - touchStartY, 2)
+                );
+                
+                // If it's a tap (short duration, small distance), handle as click
+                if (touchEndTime - touchStartTime < 300 && distance < 10) {
+                    e.preventDefault();
+                    handleClickOrTap(e);
+                }
+            }, { passive: false });
+        }
+        
+        function handleClickOrTap(e) {
+            const playerCard = e.target.closest('.player-card');
+            const positionSlot = e.target.closest('.position-slot');
+            
+            if (playerCard && !playerCard.classList.contains('in-position')) {
+                // Player card clicked/tapped - select it
+                selectPlayer(playerCard);
+            } else if (positionSlot && selectedPlayer) {
+                // Position slot clicked/tapped with player selected - place player
+                placePlayerInPosition(positionSlot);
+            } else if (!playerCard && !positionSlot) {
+                // Clicked/tapped outside - deselect
+                deselectPlayer();
+            }
         }
 
         function selectPlayer(playerCard) {
@@ -1586,42 +1745,34 @@
                 });
             });
 
-            // Improve drag and drop for touch devices
-            let touchStartX, touchStartY, touchStartTime;
-            let isDragging = false;
-
+            // Add touch feedback for player cards
             document.addEventListener('touchstart', function(e) {
-                if (e.target.closest('.player-card')) {
-                    touchStartX = e.touches[0].clientX;
-                    touchStartY = e.touches[0].clientY;
-                    touchStartTime = Date.now();
+                const playerCard = e.target.closest('.player-card');
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    playerCard.style.transform = 'scale(0.98)';
                 }
             }, { passive: true });
 
-            document.addEventListener('touchmove', function(e) {
-                if (touchStartX !== undefined) {
-                    const touchEndX = e.touches[0].clientX;
-                    const touchEndY = e.touches[0].clientY;
-                    const distance = Math.sqrt(
-                        Math.pow(touchEndX - touchStartX, 2) + 
-                        Math.pow(touchEndY - touchStartY, 2)
-                    );
-                    
-                    if (distance > 10) { // Minimum drag distance
-                        isDragging = true;
-                        e.preventDefault();
-                    }
+            document.addEventListener('touchend', function(e) {
+                const playerCard = e.target.closest('.player-card');
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    playerCard.style.transform = '';
                 }
-            }, { passive: false });
+            }, { passive: true });
+
+            // Add touch feedback for position slots
+            document.addEventListener('touchstart', function(e) {
+                const positionSlot = e.target.closest('.position-slot');
+                if (positionSlot && selectedPlayer) {
+                    positionSlot.style.transform = 'scale(0.95)';
+                }
+            }, { passive: true });
 
             document.addEventListener('touchend', function(e) {
-                if (isDragging) {
-                    isDragging = false;
-                    // Handle touch-based drag and drop here if needed
+                const positionSlot = e.target.closest('.position-slot');
+                if (positionSlot) {
+                    positionSlot.style.transform = '';
                 }
-                touchStartX = undefined;
-                touchStartY = undefined;
-                touchStartTime = undefined;
             }, { passive: true });
         }
 
