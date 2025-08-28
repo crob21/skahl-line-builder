@@ -431,7 +431,7 @@ def view_shared_lines(line_id):
         <!DOCTYPE html>
         <html>
         <head>
-            <title>SKAHL Line Builder - {line_data['name']}</title>
+            <title>Line Walrus - {line_data['name']}</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
                 body {{ 
@@ -482,6 +482,15 @@ def view_shared_lines(line_id):
                     color: #3b82f6;
                     font-size: 20px;
                     margin: 0;
+                }}
+                .tagline {{
+                    text-align: center;
+                    margin-top: -10px;
+                    margin-bottom: 20px;
+                    font-size: 1rem;
+                    color: #fbbf24;
+                    font-style: italic;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
                 }}
                 .line-section {{ 
                     margin-bottom: 35px; 
@@ -619,10 +628,11 @@ def view_shared_lines(line_id):
                 <div class="header">
                     <h1>
                         <div class="logo">
-                            <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
+                            <img src="/static/images/line-walrus-logo.png" alt="Line Walrus Logo">
                         </div>
-                        LINE WALRUS
+                        Line Walrus
                     </h1>
+                    <p class="tagline">Because Even a Walrus Can Manage Lines Better</p>
                     <h2>{line_data['name']}</h2>
                     <p>Shared on {datetime.fromisoformat(line_data['created']).strftime('%B %d, %Y at %I:%M %p')}</p>
                 </div>
@@ -734,7 +744,7 @@ def print_lines():
         <!DOCTYPE html>
         <html>
         <head>
-            <title>LINE WALRUS - Lines</title>
+            <title>Line Walrus - Lines</title>
             <link rel="icon" type="image/png" href="/static/images/favicon.png">
             <style>
                 body {{ 
@@ -771,6 +781,15 @@ def print_lines():
                     width: 100%;
                     height: 100%;
                     border-radius: 50%;
+                }}
+                .tagline {{
+                    text-align: center;
+                    margin-top: -10px;
+                    margin-bottom: 20px;
+                    font-size: 1rem;
+                    color: #fbbf24;
+                    font-style: italic;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
                 }}
                 .header h2 {{
                     color: #3b82f6;
@@ -852,10 +871,11 @@ def print_lines():
             <div class="header">
                 <h1>
                     <div class="logo">
-                        <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
+                        <img src="/static/images/line-walrus-logo.png" alt="Line Walrus Logo">
                     </div>
-                    LINE WALRUS
+                    Line Walrus
                 </h1>
+                <p class="tagline">Because Even a Walrus Can Manage Lines Better</p>
                 <h2>Game Lines - {current_date}</h2>
             </div>
         '''
@@ -951,7 +971,7 @@ if __name__ == '__main__':
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LINE WALRUS</title>
+            <title>Line Walrus</title>
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1001,6 +1021,16 @@ if __name__ == '__main__':
             width: 100%;
             height: 100%;
             border-radius: 50%;
+        }
+        
+        .tagline {
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            color: #fbbf24;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .controls {
@@ -1727,10 +1757,11 @@ if __name__ == '__main__':
     <div class="container">
         <h1>
             <div class="logo">
-                <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
+                <img src="/static/images/line-walrus-logo.png" alt="Line Walrus Logo">
             </div>
-            LINE WALRUS
+            Line Walrus
         </h1>
+        <p class="tagline">Because Even a Walrus Can Manage Lines Better</p>
         
         <div class="controls">
             <div class="team-management">
