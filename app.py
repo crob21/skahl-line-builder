@@ -8,13 +8,13 @@ from datetime import datetime
 app = Flask(__name__)
 
 class HockeyTeamManager:
-    def __init__(self, data_file="hockey_team.json"):
+    def __init__(self, data_file="data/teams/hockey_team.json"):
         self.data_file = data_file
         self.players = []
         self.lines = {
             "1": {"LW": None, "C": None, "RW": None, "LD": None, "RD": None, "G": None},
-            "2": {"LW": None, "C": None, "RW": None, "LD": None, "RD": None, "G": None},
-            "3": {"LW": None, "C": None, "RW": None, "LD": None, "RD": None, "G": None}
+            "2": {"LW": None, "C": None, "RW": None, "LD": None, "RD": None},
+            "3": {"LW": None, "C": None, "RW": None, "LD": None, "RD": None}
         }
         self.load_data()
     
@@ -24,6 +24,8 @@ class HockeyTeamManager:
             "lines": self.lines,
             "last_updated": datetime.now().isoformat()
         }
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(self.data_file), exist_ok=True)
         with open(self.data_file, 'w') as f:
             json.dump(data, f, indent=2)
     
@@ -76,6 +78,13 @@ class HockeyTeamManager:
         player = next((p for p in self.players if p["id"] == player_id), None)
         if not player:
             return {"success": False, "message": "Player not found"}
+        
+        # Check if line and position exist
+        if line_num not in self.lines:
+            return {"success": False, "message": "Invalid line number"}
+        
+        if position not in self.lines[line_num]:
+            return {"success": False, "message": "Invalid position for this line"}
         
         # Remove player from any other position
         for ln in self.lines:
@@ -146,8 +155,12 @@ def remove_from_line(player_id):
 @app.route('/api/lines/clear/<line_num>', methods=['DELETE'])
 def clear_line(line_num):
     if line_num in manager.lines:
-        manager.lines[line_num] = {"LW": None, "C": None, "RW": None, 
-                                  "LD": None, "RD": None, "G": None}
+        if line_num == 1:
+            manager.lines[line_num] = {"LW": None, "C": None, "RW": None, 
+                                      "LD": None, "RD": None, "G": None}
+        else:
+            manager.lines[line_num] = {"LW": None, "C": None, "RW": None, 
+                                      "LD": None, "RD": None}
         manager.save_data()
         return jsonify({"success": True})
     return jsonify({"success": False})
@@ -171,9 +184,12 @@ def upload_team():
         
         # Clear current team
         manager.players = []
-        for line_num in manager.lines:
-            manager.lines[line_num] = {"LW": None, "C": None, "RW": None, 
-                                      "LD": None, "RD": None, "G": None}
+        manager.lines[1] = {"LW": None, "C": None, "RW": None, 
+                           "LD": None, "RD": None, "G": None}
+        manager.lines[2] = {"LW": None, "C": None, "RW": None, 
+                           "LD": None, "RD": None}
+        manager.lines[3] = {"LW": None, "C": None, "RW": None, 
+                           "LD": None, "RD": None}
         
         # Add players from CSV
         for row in csv_reader:
@@ -255,7 +271,7 @@ def save_team():
     
     # Save to a new file
     filename = f"{team_name.replace(' ', '_').lower()}.json"
-    filepath = os.path.join(os.path.dirname(manager.data_file), filename)
+    filepath = os.path.join(os.getcwd(), filename)
     
     try:
         with open(filepath, 'w') as f:
@@ -267,9 +283,9 @@ def save_team():
 @app.route('/api/teams/load', methods=['POST'])
 def load_team():
     data = request.json
-    filename = data.get('filename', 'hockey_team.json')
+    filename = data.get('filename', 'data/teams/hockey_team.json')
     
-    filepath = os.path.join(os.path.dirname(manager.data_file), filename)
+    filepath = os.path.join(os.getcwd(), filename)
     
     if not os.path.exists(filepath):
         return jsonify({"success": False, "message": "Team file not found"})
@@ -290,8 +306,11 @@ def load_team():
 def list_teams():
     try:
         teams = []
-        directory = os.path.dirname(manager.data_file)
+        directory = os.path.join(os.getcwd(), 'data', 'teams')  # Use data/teams directory
         
+        if not os.path.exists(directory):
+            return jsonify([])
+            
         for filename in os.listdir(directory):
             if filename.endswith('.json'):
                 filepath = os.path.join(directory, filename)
@@ -312,52 +331,7 @@ def list_teams():
     except Exception as e:
         return jsonify([])
 
-@app.route('/api/teams/load-jackalopes', methods=['GET'])
-def load_jackalopes():
-    try:
-        # Clear current team
-        manager.players = []
-        for line_num in manager.lines:
-            manager.lines[line_num] = {"LW": None, "C": None, "RW": None, 
-                                      "LD": None, "RD": None, "G": None}
-        
-        # Load Jackalopes from CSV
-        csv_path = 'sample_team.csv'
-        if os.path.exists(csv_path):
-            with open(csv_path, 'r') as f:
-                csv_reader = csv.DictReader(f)
-                
-                for row in csv_reader:
-                    last_name = row.get('last_name', '').strip()
-                    first_name = row.get('first_name', '').strip()
-                    jersey_number = row.get('jersey_number', '').strip()
-                    position = row.get('position', '').strip().upper()
-                    affiliate = row.get('affiliate', '').strip().upper()
-                    
-                    if last_name and first_name and position:
-                        valid_positions = ["FORWARD", "DEFENSE", "GOALIE"]
-                        if position in valid_positions:
-                            # Create full name
-                            full_name = f"{first_name} {last_name}"
-                            
-                            player = {
-                                "name": full_name,
-                                "first_name": first_name,
-                                "last_name": last_name,
-                                "jersey_number": jersey_number,
-                                "roster_position": position,
-                                "affiliate": affiliate == "YES",
-                                "id": len(manager.players) + 1
-                            }
-                            manager.players.append(player)
-            
-            manager.save_data()
-            return jsonify({"success": True, "message": "Jackalopes team loaded successfully!"})
-        else:
-            return jsonify({"success": False, "message": "Jackalopes CSV file not found"})
-            
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Error loading Jackalopes: {str(e)}"})
+
 
 @app.route('/api/print-lines', methods=['GET'])
 def print_lines():
@@ -523,10 +497,9 @@ def print_lines():
         
         # Add single goalie section (only if there's a goalie)
         goalie_player = None
-        for line_num in ["1", "2", "3"]:
-            if manager.lines[line_num]['G']:
-                goalie_player = manager.lines[line_num]['G']
-                break
+        # Only check Line 1 for goalie since that's the only line with G position
+        if 'G' in manager.lines["1"] and manager.lines["1"]['G']:
+            goalie_player = manager.lines["1"]['G']
         
         if goalie_player:
             html_content += f'''
@@ -782,11 +755,21 @@ if __name__ == '__main__':
             gap: 20px;
         }
 
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+        
         .bench {
             background: rgba(255,255,255,0.1);
             padding: 20px;
             border-radius: 10px;
             backdrop-filter: blur(10px);
+            max-height: 50vh;
+            overflow-y: auto;
         }
 
         .bench h2, .spares h2 {
@@ -800,6 +783,8 @@ if __name__ == '__main__':
             border-radius: 10px;
             backdrop-filter: blur(10px);
             margin-top: 20px;
+            max-height: 40vh;
+            overflow-y: auto;
         }
 
         .ice-rink {
@@ -862,12 +847,40 @@ if __name__ == '__main__':
             transition: all 0.3s;
             position: relative;
             margin: 0 auto;
+            overflow: hidden;
         }
 
         .position-slot.drag-over {
             border-color: #ff6b35;
             background: rgba(255,107,53,0.2);
             transform: scale(1.05);
+        }
+        
+        /* Custom scrollbar styling */
+        .left-panel::-webkit-scrollbar,
+        .bench::-webkit-scrollbar,
+        .spares::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .left-panel::-webkit-scrollbar-track,
+        .bench::-webkit-scrollbar-track,
+        .spares::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        
+        .left-panel::-webkit-scrollbar-thumb,
+        .bench::-webkit-scrollbar-thumb,
+        .spares::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+        
+        .left-panel::-webkit-scrollbar-thumb:hover,
+        .bench::-webkit-scrollbar-thumb:hover,
+        .spares::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
         }
 
         .position-label {
@@ -911,7 +924,10 @@ if __name__ == '__main__':
             align-items: center;
             justify-content: center;
             border-radius: 6px;
-            padding: 4px 8px;
+            padding: 8px 4px;
+            border: none;
+            box-shadow: none;
+            position: relative;
         }
 
         .spare-player {
@@ -921,6 +937,70 @@ if __name__ == '__main__':
 
         .spare-player:hover {
             background: linear-gradient(135deg, #e55a2b, #e8690b);
+        }
+        
+        .player-card.goalie {
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+            color: #333;
+            border: 1px solid #e6c200;
+        }
+        
+        .player-card.goalie:hover {
+            background: linear-gradient(135deg, #e6c200, #e6a800);
+        }
+        
+        .spare-player.goalie {
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+            color: #333;
+            border: 1px solid #e6c200;
+        }
+        
+        .spare-player.goalie:hover {
+            background: linear-gradient(135deg, #e6c200, #e6a800);
+        }
+
+        .player-card.goalie .position-indicator {
+            background: #333;
+            color: #ffd700;
+        }
+
+        .position-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 3px;
+            min-width: 16px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .player-card.in-position:hover .position-indicator {
+            opacity: 1;
+        }
+
+        .player-card .roster-position {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+            font-size: 0.5rem;
+            font-weight: bold;
+            padding: 1px 3px;
+            border-radius: 2px;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .player-card:hover .roster-position {
+            opacity: 1;
         }
 
         .player-name {
@@ -994,6 +1074,9 @@ if __name__ == '__main__':
                             <button onclick="document.getElementById('csvFile').click()" class="btn-upload">📁 Upload CSV</button>
                             <button onclick="downloadTeam()" class="btn-download">💾 Download CSV</button>
                         </div>
+                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 5px; font-style: italic;">
+                            💡 Compatible with SportNinja CSV exports
+                        </div>
                     </div>
                     
                     <div class="team-section">
@@ -1031,21 +1114,22 @@ if __name__ == '__main__':
                         Affiliate Player
                     </label>
                     <button onclick="addPlayer()">Add Player</button>
-                    <button onclick="addSamplePlayers()" style="background: #28a745;">Add Sample Players</button>
                     <button onclick="printLines()" style="background: #dc3545;">🖨️ Print Lines</button>
                 </div>
             </div>
         </div>
 
         <div class="main-content">
-            <div class="bench">
-                <h2>🪑 Bench</h2>
-                <div id="benchPlayers"></div>
-            </div>
-            
-            <div class="spares">
-                <h2>🔄 Spares</h2>
-                <div id="sparePlayers"></div>
+            <div class="left-panel">
+                <div class="bench">
+                    <h2>🪑 Bench</h2>
+                    <div id="benchPlayers"></div>
+                </div>
+                
+                <div class="spares">
+                    <h2>🔄 Spares</h2>
+                    <div id="sparePlayers"></div>
+                </div>
             </div>
 
             <div class="ice-rink">
@@ -1099,11 +1183,6 @@ if __name__ == '__main__':
                             <div class="position-label">RD</div>
                         </div>
                     </div>
-                    <div class="goalie-row">
-                        <div class="position-slot goalie-position" data-position="G" data-line="2">
-                            <div class="position-label">G</div>
-                        </div>
-                    </div>
                     <button class="clear-line" onclick="clearLine(2)">Clear Line</button>
                 </div>
 
@@ -1126,11 +1205,6 @@ if __name__ == '__main__':
                         </div>
                         <div class="position-slot" data-position="RD" data-line="3">
                             <div class="position-label">RD</div>
-                        </div>
-                    </div>
-                    <div class="goalie-row">
-                        <div class="position-slot goalie-position" data-position="G" data-line="3">
-                            <div class="position-label">G</div>
                         </div>
                     </div>
                     <button class="clear-line" onclick="clearLine(3)">Clear Line</button>
@@ -1185,19 +1259,7 @@ if __name__ == '__main__':
             }
         }
 
-        async function addSamplePlayers() {
-            // Load the Jackalopes team from CSV
-            const response = await fetch('/api/teams/load-jackalopes');
-            const result = await response.json();
-            
-            if (result.success) {
-                alert('Jackalopes team loaded successfully!');
-                loadPlayers();
-                loadLines();
-            } else {
-                alert('Error loading Jackalopes team: ' + result.message);
-            }
-        }
+
 
         async function removePlayer(playerId) {
             const response = await fetch(`/api/players/${playerId}`, {
@@ -1211,40 +1273,49 @@ if __name__ == '__main__':
         }
 
         async function loadPlayers() {
-            const response = await fetch('/api/players');
-            const players = await response.json();
-            
-            const benchDiv = document.getElementById('benchPlayers');
-            const sparesDiv = document.getElementById('sparePlayers');
-            benchDiv.innerHTML = '';
-            sparesDiv.innerHTML = '';
-            
-            // Get players currently in lines
-            const linesResponse = await fetch('/api/lines');
-            const lines = await linesResponse.json();
-            const playersInLines = new Set();
-            
-            Object.values(lines).forEach(line => {
-                Object.values(line).forEach(player => {
-                    if (player) playersInLines.add(player.id);
+            try {
+                const response = await fetch('/api/players');
+                const players = await response.json();
+                
+                console.log('Loading players:', players);
+                
+                const benchDiv = document.getElementById('benchPlayers');
+                const sparesDiv = document.getElementById('sparePlayers');
+                benchDiv.innerHTML = '';
+                sparesDiv.innerHTML = '';
+                
+                // Get players currently in lines
+                const linesResponse = await fetch('/api/lines');
+                const lines = await linesResponse.json();
+                const playersInLines = new Set();
+                
+                Object.values(lines).forEach(line => {
+                    Object.values(line).forEach(player => {
+                        if (player) playersInLines.add(player.id);
+                    });
                 });
-            });
-            
-            // Separate regular players and spares
-            const regularPlayers = players.filter(p => !playersInLines.has(p.id) && !p.affiliate);
-            const sparePlayers = players.filter(p => !playersInLines.has(p.id) && p.affiliate);
-            
-            // Show regular bench players
-            regularPlayers.forEach(player => {
-                const playerCard = createPlayerCard(player);
-                benchDiv.appendChild(playerCard);
-            });
-            
-            // Show spare players
-            sparePlayers.forEach(player => {
-                const playerCard = createPlayerCard(player);
-                sparesDiv.appendChild(playerCard);
-            });
+                
+                // Separate regular players and spares
+                const regularPlayers = players.filter(p => !playersInLines.has(p.id) && !p.affiliate);
+                const sparePlayers = players.filter(p => !playersInLines.has(p.id) && p.affiliate);
+                
+                console.log('Regular players (bench):', regularPlayers);
+                console.log('Spare players:', sparePlayers);
+                
+                // Show regular bench players
+                regularPlayers.forEach(player => {
+                    const playerCard = createPlayerCard(player);
+                    benchDiv.appendChild(playerCard);
+                });
+                
+                // Show spare players
+                sparePlayers.forEach(player => {
+                    const playerCard = createPlayerCard(player);
+                    sparesDiv.appendChild(playerCard);
+                });
+            } catch (error) {
+                console.error('Error loading players:', error);
+            }
         }
 
         function createPlayerCard(player) {
@@ -1253,13 +1324,16 @@ if __name__ == '__main__':
             if (player.affiliate) {
                 card.classList.add('spare-player');
             }
+            if (player.roster_position === 'GOALIE' || player.position === 'GOALIE') {
+                card.classList.add('goalie');
+            }
             card.draggable = true;
             card.dataset.playerId = player.id;
             
             const jerseyDisplay = player.jersey_number ? `#${player.jersey_number}` : '';
             card.innerHTML = `
                 <div class="player-name">${player.name} ${jerseyDisplay}</div>
-                <div class="player-position">${player.roster_position || player.position}</div>
+                <div class="roster-position">${player.roster_position || player.position}</div>
                 <button onclick="removePlayer(${player.id})" class="remove-btn">×</button>
             `;
             
@@ -1272,32 +1346,59 @@ if __name__ == '__main__':
         }
 
         async function loadLines() {
-            const response = await fetch('/api/lines');
-            const lines = await response.json();
-            
-            // Clear all position slots
-            document.querySelectorAll('.position-slot').forEach(slot => {
-                slot.innerHTML = slot.querySelector('.position-label').outerHTML;
-            });
-            
-            // Populate with players
-            Object.entries(lines).forEach(([lineNum, line]) => {
-                Object.entries(line).forEach(([position, player]) => {
-                    if (player) {
-                        const slot = document.querySelector(`[data-line="${lineNum}"][data-position="${position}"]`);
-                        if (slot) {
-                            slot.innerHTML = `
-                                ${slot.querySelector('.position-label').outerHTML}
-                                <div class="player-card" data-player-id="${player.id}">
-                                    <div class="player-name">${player.name}</div>
-                                    <div class="player-position">${player.position}</div>
-                                    <button onclick="removeFromLine(${player.id})" class="remove-btn">×</button>
-                                </div>
-                            `;
-                        }
+            try {
+                const response = await fetch('/api/lines');
+                const lines = await response.json();
+                
+                console.log('Loading lines:', lines);
+                
+                // Clear all position slots
+                document.querySelectorAll('.position-slot').forEach(slot => {
+                    const positionLabel = slot.querySelector('.position-label');
+                    if (positionLabel) {
+                        slot.innerHTML = positionLabel.outerHTML;
+                    } else {
+                        // If no position label exists, create one based on the slot's data attributes
+                        const position = slot.dataset.position;
+                        slot.innerHTML = `<div class="position-label">${position}</div>`;
                     }
                 });
-            });
+                
+                // Populate with players
+                Object.entries(lines).forEach(([lineNum, line]) => {
+                    Object.entries(line).forEach(([position, player]) => {
+                        if (player) {
+                            const slot = document.querySelector(`[data-line="${lineNum}"][data-position="${position}"]`);
+                            if (slot) {
+                                const playerCardClass = (player.roster_position === 'GOALIE' || player.position === 'GOALIE') ? 'player-card goalie' : 'player-card';
+                                slot.innerHTML = `
+                                    <div class="${playerCardClass} in-position" data-player-id="${player.id}" draggable="true">
+                                        <div class="position-indicator">${position}</div>
+                                        <div class="player-name">${player.name}</div>
+                                        <button onclick="removeFromLine(${player.id})" class="remove-btn">×</button>
+                                    </div>
+                                `;
+                                
+                                // Add drag event listeners to the player card
+                                const playerCard = slot.querySelector('.player-card');
+                                if (playerCard) {
+                                    playerCard.addEventListener('dragstart', (e) => {
+                                        draggedPlayer = player;
+                                        e.dataTransfer.setData('text/plain', player.id);
+                                        e.target.classList.add('dragging');
+                                    });
+                                    
+                                    playerCard.addEventListener('dragend', (e) => {
+                                        e.target.classList.remove('dragging');
+                                    });
+                                }
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading lines:', error);
+            }
         }
 
         function setupDropZones() {
@@ -1336,19 +1437,76 @@ if __name__ == '__main__':
                         const lineNum = slot.dataset.line;
                         const position = slot.dataset.position;
                         
-                        const response = await fetch('/api/lines/set-player', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                player_id: draggedPlayer.id,
-                                line_num: lineNum,
-                                position: position
-                            })
-                        });
-                        
-                        if (response.ok) {
-                            loadPlayers();
-                            loadLines();
+                        try {
+                            // Check if the target slot already has a player
+                            const existingPlayer = slot.querySelector('.player-card');
+                            if (existingPlayer) {
+                                // If there's already a player, we need to swap them
+                                const existingPlayerId = existingPlayer.dataset.playerId;
+                                
+                                // First, remove the dragged player from their current position
+                                await fetch(`/api/lines/remove-player/${draggedPlayer.id}`, {
+                                    method: 'DELETE'
+                                });
+                                
+                                // Then, remove the existing player from the target position
+                                await fetch(`/api/lines/remove-player/${existingPlayerId}`, {
+                                    method: 'DELETE'
+                                });
+                                
+                                // Now place both players in their new positions
+                                await fetch('/api/lines/set-player', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        player_id: draggedPlayer.id,
+                                        line_num: lineNum,
+                                        position: position
+                                    })
+                                });
+                                
+                                // Find where the dragged player was originally and put the existing player there
+                                const originalSlot = document.querySelector(`[data-player-id="${draggedPlayer.id}"]`);
+                                if (originalSlot) {
+                                    const originalLine = originalSlot.closest('.position-slot').dataset.line;
+                                    const originalPosition = originalSlot.closest('.position-slot').dataset.position;
+                                    
+                                    await fetch('/api/lines/set-player', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            player_id: existingPlayerId,
+                                            line_num: originalLine,
+                                            position: originalPosition
+                                        })
+                                    });
+                                }
+                            } else {
+                                // Simple case: just place the player in the empty slot
+                                const response = await fetch('/api/lines/set-player', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        player_id: draggedPlayer.id,
+                                        line_num: lineNum,
+                                        position: position
+                                    })
+                                });
+                            }
+                            
+                            // Clear the dragged player reference
+                            draggedPlayer = null;
+                            
+                            // Refresh the display
+                            console.log('Refreshing display...');
+                            await loadPlayers();
+                            await loadLines();
+                            console.log('Display refresh complete');
+                            
+                        } catch (error) {
+                            console.error('Error during drop operation:', error);
+                            // Clear the dragged player reference on error
+                            draggedPlayer = null;
                         }
                     }
                 });

@@ -411,17 +411,16 @@
       "C": null,
       "RW": null,
       "LD": null,
-      "RD": null,
-      "G": null
+      "RD": null
     },
     "3": {
       "LW": null,
       "C": null,
       "RW": null,
       "LD": null,
-      "RD": null,
-      "G": null
+      "RD": null
     }
   },
-  "last_updated": "2025-08-27T19:57:55.182761"
+  "last_updated": "2025-08-27T20:12:00",
+  "team_name": "Jackalopes"
 }

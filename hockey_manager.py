@@ -3,13 +3,13 @@ import os
 from datetime import datetime
 
 class HockeyTeamManager:
-    def __init__(self, data_file="hockey_team.json"):
+    def __init__(self, data_file="data/teams/hockey_team.json"):
         self.data_file = data_file
         self.players = []
         self.lines = {
             1: {"LW": None, "C": None, "RW": None, "LD": None, "RD": None, "G": None},
-            2: {"LW": None, "C": None, "RW": None, "LD": None, "RD": None, "G": None},
-            3: {"LW": None, "C": None, "RW": None, "LD": None, "RD": None, "G": None}
+            2: {"LW": None, "C": None, "RW": None, "LD": None, "RD": None},
+            3: {"LW": None, "C": None, "RW": None, "LD": None, "RD": None}
         }
         self.load_data()
     
@@ -36,9 +36,11 @@ class HockeyTeamManager:
                 print(f"✅ Data loaded from {self.data_file}")
             except (json.JSONDecodeError, KeyError) as e:
                 print(f"⚠️  Error loading data: {e}")
-                print("Starting with empty roster")
+                print("Starting with Kraken roster")
+                self.load_kraken_roster()
         else:
-            print("📝 No saved data found, starting fresh")
+            print("📝 No saved data found, loading Kraken roster")
+            self.load_kraken_roster()
     
     def add_player(self, name, position):
         """Add a new player to the roster"""
@@ -115,6 +117,11 @@ class HockeyTeamManager:
             print("❌ Line number must be 1, 2, or 3")
             return False
         
+        # Only Line 1 can have a goalie
+        if position == "G" and line_num != 1:
+            print("❌ Goalie position only available on Line 1")
+            return False
+        
         if position not in ["LW", "C", "RW", "LD", "RD", "G"]:
             print("❌ Invalid position. Use: LW, C, RW, LD, RD, G")
             return False
@@ -148,7 +155,8 @@ class HockeyTeamManager:
             print(f"\nLine {line_num}:")
             print(f"  {line['LW'] or '___':10} - {line['C'] or '___':10} - {line['RW'] or '___'}")
             print(f"  {line['LD'] or '___':10} - {line['RD'] or '___'}")
-            print(f"  G: {line['G'] or '___'}")
+            if line_num == 1:
+                print(f"  G: {line['G'] or '___'}")
         
         # Show bench players
         self.show_bench()
@@ -176,19 +184,67 @@ class HockeyTeamManager:
             print("❌ Line number must be 1, 2, or 3")
             return False
         
-        self.lines[line_num] = {"LW": None, "C": None, "RW": None, 
-                               "LD": None, "RD": None, "G": None}
+        if line_num == 1:
+            self.lines[line_num] = {"LW": None, "C": None, "RW": None, 
+                                   "LD": None, "RD": None, "G": None}
+        else:
+            self.lines[line_num] = {"LW": None, "C": None, "RW": None, 
+                                   "LD": None, "RD": None}
         self.save_data()
         print(f"✅ Cleared Line {line_num}")
         return True
     
     def clear_all_lines(self):
         """Clear all lines"""
-        for line_num in [1, 2, 3]:
-            self.lines[line_num] = {"LW": None, "C": None, "RW": None, 
-                                   "LD": None, "RD": None, "G": None}
+        self.lines[1] = {"LW": None, "C": None, "RW": None, 
+                         "LD": None, "RD": None, "G": None}
+        self.lines[2] = {"LW": None, "C": None, "RW": None, 
+                         "LD": None, "RD": None}
+        self.lines[3] = {"LW": None, "C": None, "RW": None, 
+                         "LD": None, "RD": None}
         self.save_data()
         print("✅ Cleared all lines!")
+    
+    def load_kraken_roster(self):
+        """Load default Seattle Kraken roster"""
+        import csv
+        
+        kraken_file = "kraken_roster.csv"
+        if os.path.exists(kraken_file):
+            try:
+                with open(kraken_file, 'r') as f:
+                    csv_reader = csv.DictReader(f)
+                    
+                    for row in csv_reader:
+                        last_name = row.get('last_name', '').strip()
+                        first_name = row.get('first_name', '').strip()
+                        jersey_number = row.get('jersey_number', '').strip()
+                        position = row.get('position', '').strip().upper()
+                        affiliate = row.get('affiliate', '').strip().upper()
+                        
+                        if last_name and first_name and position:
+                            valid_positions = ["FORWARD", "DEFENSE", "GOALIE"]
+                            if position in valid_positions:
+                                # Create full name
+                                full_name = f"{first_name} {last_name}"
+                                
+                                player = {
+                                    "name": full_name,
+                                    "first_name": first_name,
+                                    "last_name": last_name,
+                                    "jersey_number": jersey_number,
+                                    "roster_position": position,
+                                    "affiliate": affiliate == "YES",
+                                    "id": len(self.players) + 1
+                                }
+                                self.players.append(player)
+                
+                self.save_data()
+                print("✅ Loaded Seattle Kraken roster!")
+            except Exception as e:
+                print(f"⚠️  Error loading Kraken roster: {e}")
+        else:
+            print("⚠️  Kraken roster file not found")
 
 def main():
     """Main interactive menu"""
