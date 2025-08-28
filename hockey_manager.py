@@ -32,7 +32,14 @@ class HockeyTeamManager:
                 with open(self.data_file, 'r') as f:
                     data = json.load(f)
                     self.players = data.get("players", [])
-                    self.lines = data.get("lines", self.lines)
+                    
+                    # Load lines and ensure line numbers are integers
+                    loaded_lines = data.get("lines", self.lines)
+                    self.lines = {}
+                    for line_key, line_data in loaded_lines.items():
+                        line_num = int(line_key) if isinstance(line_key, str) else line_key
+                        self.lines[line_num] = line_data
+                    
                 print(f"✅ Data loaded from {self.data_file}")
             except (json.JSONDecodeError, KeyError) as e:
                 print(f"⚠️  Error loading data: {e}")
