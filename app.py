@@ -8,7 +8,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 class HockeyTeamManager:
-    def __init__(self, data_file="data/teams/hockey_team.json"):
+    def __init__(self, data_file="data/teams/current_session.json"):
         self.data_file = data_file
         self.players = []
         self.lines = {
