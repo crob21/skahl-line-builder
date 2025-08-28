@@ -132,6 +132,7 @@ dmypy.json
 data/teams/*.json
 !data/teams/seattle_kraken.json
 !data/teams/jackalopes.json
+!data/teams/hockey_team.json
 
 # IDE files
 .vscode/
