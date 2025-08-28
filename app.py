@@ -459,6 +459,24 @@ def view_shared_lines(line_id):
                     color: #fbbf24;
                     font-size: 28px;
                     margin-bottom: 5px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 15px;
+                }}
+                .logo {{
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }}
+                .logo img {{
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
                 }}
                 .header h2 {{
                     color: #3b82f6;
@@ -600,7 +618,9 @@ def view_shared_lines(line_id):
             <div class="container">
                 <div class="header">
                     <h1>
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHN0eWxlPgogIC5zaGllbGQgeyBmaWxsOiAjOEI1N0YzOyB9CiAgLndhbHJ1cyB7IGZpbGw6ICM4QjU3RjM7IH0KICAuaGVsbWV0IHsgZmlsbDogIzFBM0E4QTsgfQogIC5zdGljayB7IGZpbGw6ICMxQTNBOEE7IH0KICAudGV4dCB7IGZpbGw6IHdoaXRlOyBmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7IGZvbnQtd2VpZ2h0OiBib2xkOyB9CiAgLmJhbm5lciB7IGZpbGw6ICMxQTNBOEE7IH0KPC9zdHlsZT4KPHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZyBjbGFzcz0ic2hpZWxkIj4KICAgIDxwYXRoIGQ9Ik0zMCA1QzQwIDUgNDggMTMgNDggMjNWMzVDNDggNDUgNDAgNTMgMzAgNTNDMjAgNTMgMTIgNDUgMTIgMzVWMjNDMTIgMTMgMjAgNSAzMCA1WiIgZmlsbD0iI0Q3QzM5QyIvPgogICAgPHBhdGggZD0iTTMwIDVDNDAgNSA0OCAxMyA0OCAyM1YzNUM0OCA0NSA0MCA1MyAzMCA1M0MyMCA1MyAxMiA0NSAxMiAzNVYyM0MxMiAxMyAyMCA1IDMwIDVaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMiIvPgogIDwvZz4KICA8ZyBjbGFzcz0id2FscnVzIj4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIGZpbGw9IiM4QjU3RjMiLz4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIHN0cm9rZT0iIzFBM0E4QSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8Y2lyY2xlIGN4PSIyMiIgY3k9IjI3IiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgogICAgPGNpcmNsZSBjeD0iMjgiIGN5PSIyNyIgcj0iMSIgZmlsbD0id2hpdGUiLz4KICAgIDxwYXRoIGQ9Ik0xOCAzMkwyMiAzNkwyOCAzNkwzMiAzMiIgc3Ryb2tlPSIjMUEzQThBIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz4KICA8L2c+CiAgPGcgY2xhc3M9ImhlbG1ldCI+CiAgICA8cGF0aCBkPSJNMTggMjJMMjIgMjBMMzAgMjBMMzQgMjJMMzQgMjVMMzAgMjNMMjIgMjNMMTggMjVaIiBmaWxsPSIjMUEzQThBIi8+CiAgPC9nPgogIDxnIGNsYXNzPSJzdGljayI+CiAgICA8cGF0aCBkPSJNMzAgMzJMMzUgMjhMMzggMjlMMzUgMzRMMzAgMzJaIiBmaWxsPSIjMUEzQThBIi8+CiAgICA8cGF0aCBkPSJNMzUgMjhMMzggMjlMMzUgMzRaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDwvZz4KICA8ZyBjbGFzcz0iYmFubmVyIj4KICAgIDxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjEwIiByeD0iMiIgZmlsbD0iIzFBM0E4QSIvPgogICAgPHRleHQgeD0iMzAiIHk9IjQ3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5MSU5FPC90ZXh0PgogICAgPHRleHQgeD0iMzAiIHk9IjU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5XQUxSVVM8L3RleHQ+CiAgPC9nPgo8L3N2Zz4K" alt="LINE WALRUS Logo" class="logo">
+                        <div class="logo">
+                            <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
+                        </div>
                         LINE WALRUS
                     </h1>
                     <h2>{line_data['name']}</h2>
@@ -715,6 +735,7 @@ def print_lines():
         <html>
         <head>
             <title>LINE WALRUS - Lines</title>
+            <link rel="icon" type="image/png" href="/static/images/favicon.png">
             <style>
                 body {{ 
                     font-family: Arial, sans-serif; 
@@ -732,6 +753,24 @@ def print_lines():
                     color: #1e3a8a;
                     font-size: 28px;
                     margin-bottom: 5px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 15px;
+                }}
+                .logo {{
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }}
+                .logo img {{
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
                 }}
                 .header h2 {{
                     color: #3b82f6;
@@ -812,7 +851,9 @@ def print_lines():
         <body>
             <div class="header">
                 <h1>
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHN0eWxlPgogIC5zaGllbGQgeyBmaWxsOiAjOEI1N0YzOyB9CiAgLndhbHJ1cyB7IGZpbGw6ICM4QjU3RjM7IH0KICAuaGVsbWV0IHsgZmlsbDogIzFBM0E4QTsgfQogIC5zdGljayB7IGZpbGw6ICMxQTNBOEE7IH0KICAudGV4dCB7IGZpbGw6IHdoaXRlOyBmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7IGZvbnQtd2VpZ2h0OiBib2xkOyB9CiAgLmJhbm5lciB7IGZpbGw6ICMxQTNBOEE7IH0KPC9zdHlsZT4KPHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZyBjbGFzcz0ic2hpZWxkIj4KICAgIDxwYXRoIGQ9Ik0zMCA1QzQwIDUgNDggMTMgNDggMjNWMzVDNDggNDUgNDAgNTMgMzAgNTNDMjAgNTMgMTIgNDUgMTIgMzVWMjNDMTIgMTMgMjAgNSAzMCA1WiIgZmlsbD0iI0Q3QzM5QyIvPgogICAgPHBhdGggZD0iTTMwIDVDNDAgNSA0OCAxMyA0OCAyM1YzNUM0OCA0NSA0MCA1MyAzMCA1M0MyMCA1MyAxMiA0NSAxMiAzNVYyM0MxMiAxMyAyMCA1IDMwIDVaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMiIvPgogIDwvZz4KICA8ZyBjbGFzcz0id2FscnVzIj4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIGZpbGw9IiM4QjU3RjMiLz4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIHN0cm9rZT0iIzFBM0E4QSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8Y2lyY2xlIGN4PSIyMiIgY3k9IjI3IiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgogICAgPGNpcmNsZSBjeD0iMjgiIGN5PSIyNyIgcj0iMSIgZmlsbD0id2hpdGUiLz4KICAgIDxwYXRoIGQ9Ik0xOCAzMkwyMiAzNkwyOCAzNkwzMiAzMiIgc3Ryb2tlPSIjMUEzQThBIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz4KICA8L2c+CiAgPGcgY2xhc3M9ImhlbG1ldCI+CiAgICA8cGF0aCBkPSJNMTggMjJMMjIgMjBMMzAgMjBMMzQgMjJMMzQgMjVMMzAgMjNMMjIgMjNMMTggMjVaIiBmaWxsPSIjMUEzQThBIi8+CiAgPC9nPgogIDxnIGNsYXNzPSJzdGljayI+CiAgICA8cGF0aCBkPSJNMzAgMzJMMzUgMjhMMzggMjlMMzUgMzRMMzAgMzJaIiBmaWxsPSIjMUEzQThBIi8+CiAgICA8cGF0aCBkPSJNMzUgMjhMMzggMjlMMzUgMzRaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDwvZz4KICA8ZyBjbGFzcz0iYmFubmVyIj4KICAgIDxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjEwIiByeD0iMiIgZmlsbD0iIzFBM0E4QSIvPgogICAgPHRleHQgeD0iMzAiIHk9IjQ3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5MSU5FPC90ZXh0PgogICAgPHRleHQgeD0iMzAiIHk9IjU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5XQUxSVVM8L3RleHQ+CiAgPC9nPgo8L3N2Zz4K" alt="LINE WALRUS Logo" class="logo">
+                    <div class="logo">
+                        <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
+                    </div>
                     LINE WALRUS
                 </h1>
                 <h2>Game Lines - {current_date}</h2>
@@ -910,7 +951,8 @@ if __name__ == '__main__':
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                    <title>LINE WALRUS</title>
+    <title>LINE WALRUS</title>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
@@ -946,12 +988,19 @@ if __name__ == '__main__':
         }
         
         .logo {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: white;
-            padding: 5px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
         }
 
         .controls {
@@ -1677,7 +1726,9 @@ if __name__ == '__main__':
 <body>
     <div class="container">
         <h1>
-            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHN0eWxlPgogIC5zaGllbGQgeyBmaWxsOiAjOEI1N0YzOyB9CiAgLndhbHJ1cyB7IGZpbGw6ICM4QjU3RjM7IH0KICAuaGVsbWV0IHsgZmlsbDogIzFBM0E4QTsgfQogIC5zdGljayB7IGZpbGw6ICMxQTNBOEE7IH0KICAudGV4dCB7IGZpbGw6IHdoaXRlOyBmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7IGZvbnQtd2VpZ2h0OiBib2xkOyB9CiAgLmJhbm5lciB7IGZpbGw6ICMxQTNBOEE7IH0KPC9zdHlsZT4KPHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZyBjbGFzcz0ic2hpZWxkIj4KICAgIDxwYXRoIGQ9Ik0zMCA1QzQwIDUgNDggMTMgNDggMjNWMzVDNDggNDUgNDAgNTMgMzAgNTNDMjAgNTMgMTIgNDUgMTIgMzVWMjNDMTIgMTMgMjAgNSAzMCA1WiIgZmlsbD0iI0Q3QzM5QyIvPgogICAgPHBhdGggZD0iTTMwIDVDNDAgNSA0OCAxMyA0OCAyM1YzNUM0OCA0NSA0MCA1MyAzMCA1M0MyMCA1MyAxMiA0NSAxMiAzNVYyM0MxMiAxMyAyMCA1IDMwIDVaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMiIvPgogIDwvZz4KICA8ZyBjbGFzcz0id2FscnVzIj4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIGZpbGw9IiM4QjU3RjMiLz4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIHN0cm9rZT0iIzFBM0E4QSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8Y2lyY2xlIGN4PSIyMiIgY3k9IjI3IiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgogICAgPGNpcmNsZSBjeD0iMjgiIGN5PSIyNyIgcj0iMSIgZmlsbD0id2hpdGUiLz4KICAgIDxwYXRoIGQ9Ik0xOCAzMkwyMiAzNkwyOCAzNkwzMiAzMiIgc3Ryb2tlPSIjMUEzQThBIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz4KICA8L2c+CiAgPGcgY2xhc3M9ImhlbG1ldCI+CiAgICA8cGF0aCBkPSJNMTggMjJMMjIgMjBMMzAgMjBMMzQgMjJMMzQgMjVMMzAgMjNMMjIgMjNMMTggMjVaIiBmaWxsPSIjMUEzQThBIi8+CiAgPC9nPgogIDxnIGNsYXNzPSJzdGljayI+CiAgICA8cGF0aCBkPSJNMzAgMzJMMzUgMjhMMzggMjlMMzUgMzRMMzAgMzJaIiBmaWxsPSIjMUEzQThBIi8+CiAgICA8cGF0aCBkPSJNMzUgMjhMMzggMjlMMzUgMzRaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDwvZz4KICA8ZyBjbGFzcz0iYmFubmVyIj4KICAgIDxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjEwIiByeD0iMiIgZmlsbD0iIzFBM0E4QSIvPgogICAgPHRleHQgeD0iMzAiIHk9IjQ3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5MSU5FPC90ZXh0PgogICAgPHRleHQgeD0iMzAiIHk9IjU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5XQUxSVVM8L3RleHQ+CiAgPC9nPgo8L3N2Zz4K" alt="LINE WALRUS Logo" class="logo">
+            <div class="logo">
+                <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
+            </div>
             LINE WALRUS
         </h1>
         

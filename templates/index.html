@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SKAHL Line Builder</title>
+    <title>LINE WALRUS</title>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
@@ -32,6 +33,26 @@
             margin-bottom: 30px;
             font-size: 2.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
         }
 
         .controls {
@@ -97,9 +118,7 @@
             flex-direction: column;
             justify-content: space-between;
             min-height: 120px;
-        }
-
-        .team-section h4 {
+        }        .team-section h4 {
             margin-bottom: 12px;
             text-align: center;
             color: #fff;
@@ -758,7 +777,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>🏒 SKAHL Line Builder</h1>
+        <h1>
+            <div class="logo">
+                <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
+            </div>
+            LINE WALRUS
+        </h1>
         
         <div class="controls">
             <div class="team-management">
@@ -1500,30 +1524,65 @@
             });
         }
 
-        // Click-to-select functionality
+        // Mobile-first player placement system
         let selectedPlayer = null;
         let selectedPlayerElement = null;
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        function setupClickToSelect() {
+        function setupMobilePlayerPlacement() {
+            if (isMobile) {
+                // Mobile: Use touch events only
+                setupMobileTouchPlacement();
+            } else {
+                // Desktop: Use click events
+                setupDesktopClickPlacement();
+            }
+        }
+
+        function setupMobileTouchPlacement() {
             let touchStartTime = 0;
             let touchStartX = 0;
             let touchStartY = 0;
-            
-            // Handle both click and touch events
-            document.addEventListener('click', function(e) {
-                // Only handle clicks that aren't from touch events
-                if (Date.now() - touchStartTime > 300) {
-                    handleClickOrTap(e);
-                }
-            });
-            
-            // Handle touch events for mobile
+            let isDragging = false;
+
+            // Touch start - detect what was touched
             document.addEventListener('touchstart', function(e) {
+                const playerCard = e.target.closest('.player-card');
+                const positionSlot = e.target.closest('.position-slot');
+                
                 touchStartTime = Date.now();
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
+                isDragging = false;
+
+                // Visual feedback for touch
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    playerCard.style.transform = 'scale(0.95)';
+                    playerCard.style.opacity = '0.8';
+                }
+                if (positionSlot && selectedPlayer) {
+                    positionSlot.style.transform = 'scale(0.95)';
+                    positionSlot.style.opacity = '0.8';
+                }
             }, { passive: true });
-            
+
+            // Touch move - detect if user is dragging
+            document.addEventListener('touchmove', function(e) {
+                if (touchStartX !== undefined) {
+                    const touchEndX = e.touches[0].clientX;
+                    const touchEndY = e.touches[0].clientY;
+                    const distance = Math.sqrt(
+                        Math.pow(touchEndX - touchStartX, 2) + 
+                        Math.pow(touchEndY - touchStartY, 2)
+                    );
+                    
+                    if (distance > 5) { // Small threshold for mobile
+                        isDragging = true;
+                    }
+                }
+            }, { passive: true });
+
+            // Touch end - handle the action
             document.addEventListener('touchend', function(e) {
                 const touchEndTime = Date.now();
                 const touchEndX = e.changedTouches[0].clientX;
@@ -1535,28 +1594,53 @@
                     Math.pow(touchEndY - touchStartY, 2)
                 );
                 
-                // If it's a tap (short duration, small distance), handle as click
-                if (touchEndTime - touchStartTime < 300 && distance < 10) {
+                // Reset visual feedback
+                document.querySelectorAll('.player-card, .position-slot').forEach(el => {
+                    el.style.transform = '';
+                    el.style.opacity = '';
+                });
+
+                // Only handle if it's a tap (not a drag)
+                if (!isDragging && touchEndTime - touchStartTime < 500 && distance < 10) {
                     e.preventDefault();
-                    handleClickOrTap(e);
+                    
+                    const playerCard = e.target.closest('.player-card');
+                    const positionSlot = e.target.closest('.position-slot');
+                    
+                    if (playerCard && !playerCard.classList.contains('in-position')) {
+                        // Select player
+                        selectPlayer(playerCard);
+                        showFeedback('Player selected! Tap a position to place.', 'info');
+                    } else if (positionSlot && selectedPlayer) {
+                        // Place player
+                        placePlayerInPosition(positionSlot);
+                    } else if (!playerCard && !positionSlot) {
+                        // Deselect
+                        deselectPlayer();
+                    }
                 }
+
+                // Reset tracking variables
+                touchStartX = undefined;
+                touchStartY = undefined;
+                touchStartTime = 0;
+                isDragging = false;
             }, { passive: false });
         }
-        
-        function handleClickOrTap(e) {
-            const playerCard = e.target.closest('.player-card');
-            const positionSlot = e.target.closest('.position-slot');
-            
-            if (playerCard && !playerCard.classList.contains('in-position')) {
-                // Player card clicked/tapped - select it
-                selectPlayer(playerCard);
-            } else if (positionSlot && selectedPlayer) {
-                // Position slot clicked/tapped with player selected - place player
-                placePlayerInPosition(positionSlot);
-            } else if (!playerCard && !positionSlot) {
-                // Clicked/tapped outside - deselect
-                deselectPlayer();
-            }
+
+        function setupDesktopClickPlacement() {
+            document.addEventListener('click', function(e) {
+                const playerCard = e.target.closest('.player-card');
+                const positionSlot = e.target.closest('.position-slot');
+                
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    selectPlayer(playerCard);
+                } else if (positionSlot && selectedPlayer) {
+                    placePlayerInPosition(positionSlot);
+                } else if (!playerCard && !positionSlot) {
+                    deselectPlayer();
+                }
+            });
         }
 
         function selectPlayer(playerCard) {
@@ -1776,11 +1860,11 @@
             }, { passive: true });
         }
 
-        // Initialize all functionality when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            setupMobileTouch();
-            setupClickToSelect();
-        });
+                    // Initialize all functionality when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                setupMobileTouch();
+                setupMobilePlayerPlacement();
+            });
     </script>
 </body>
 </html>
