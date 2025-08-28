@@ -1,14 +1,24 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session
 import json
 import os
 import csv
 import io
 from datetime import datetime
+import secrets
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)  # Generate a random secret key
+
+def get_session_data_file():
+    """Get the data file path for the current session"""
+    if 'session_id' not in session:
+        session['session_id'] = secrets.token_hex(8)  # Generate unique session ID
+    return f"data/sessions/{session['session_id']}.json"
 
 class HockeyTeamManager:
-    def __init__(self, data_file="data/teams/current_session.json"):
+    def __init__(self, data_file=None):
+        if data_file is None:
+            data_file = get_session_data_file()
         self.data_file = data_file
         self.players = []
         self.lines = {
@@ -109,8 +119,18 @@ class HockeyTeamManager:
         self.save_data()
         return {"success": True}
 
-# Create the manager instance
-manager = HockeyTeamManager()
+def get_manager():
+    """Get the team manager for the current session"""
+    return HockeyTeamManager()
+
+def get_shared_team_manager():
+    """Get a team manager for shared team operations (save/load)"""
+    # Use a temporary file for shared operations
+    return HockeyTeamManager("data/teams/temp_shared.json")
+
+def generate_line_id():
+    """Generate a unique ID for shared lines"""
+    return secrets.token_hex(8)
 
 @app.route('/')
 def index():
@@ -118,10 +138,12 @@ def index():
 
 @app.route('/api/players', methods=['GET'])
 def get_players():
+    manager = get_manager()
     return jsonify(manager.players)
 
 @app.route('/api/players', methods=['POST'])
 def add_player():
+    manager = get_manager()
     data = request.json
     jersey_number = data.get('jersey_number', '')
     affiliate = data.get('affiliate', False)
@@ -130,15 +152,18 @@ def add_player():
 
 @app.route('/api/players/<int:player_id>', methods=['DELETE'])
 def remove_player(player_id):
+    manager = get_manager()
     result = manager.remove_player(player_id)
     return jsonify(result)
 
 @app.route('/api/lines', methods=['GET'])
 def get_lines():
+    manager = get_manager()
     return jsonify(manager.lines)
 
 @app.route('/api/lines/set-player', methods=['POST'])
 def set_player_in_line():
+    manager = get_manager()
     data = request.json
     result = manager.set_player_in_line(
         data['player_id'], 
@@ -149,11 +174,13 @@ def set_player_in_line():
 
 @app.route('/api/lines/remove-player/<int:player_id>', methods=['DELETE'])
 def remove_from_line(player_id):
+    manager = get_manager()
     result = manager.remove_from_line(player_id)
     return jsonify(result)
 
 @app.route('/api/lines/clear/<line_num>', methods=['DELETE'])
 def clear_line(line_num):
+    manager = get_manager()
     if line_num in manager.lines:
         # Clear the line by setting all positions to None
         if line_num == 1:
@@ -168,6 +195,8 @@ def clear_line(line_num):
 
 @app.route('/api/teams/upload', methods=['POST'])
 def upload_team():
+    # Get current session manager to load CSV into
+    session_manager = get_manager()
     if 'file' not in request.files:
         return jsonify({"success": False, "message": "No file uploaded"})
     
@@ -183,14 +212,14 @@ def upload_team():
         content = file.read().decode('utf-8')
         csv_reader = csv.DictReader(io.StringIO(content))
         
-        # Clear current team
-        manager.players = []
-        manager.lines[1] = {"LW": None, "C": None, "RW": None, 
-                           "LD": None, "RD": None, "G": None}
-        manager.lines[2] = {"LW": None, "C": None, "RW": None, 
-                           "LD": None, "RD": None}
-        manager.lines[3] = {"LW": None, "C": None, "RW": None, 
-                           "LD": None, "RD": None}
+        # Clear current session team
+        session_manager.players = []
+        session_manager.lines[1] = {"LW": None, "C": None, "RW": None, 
+                                   "LD": None, "RD": None, "G": None}
+        session_manager.lines[2] = {"LW": None, "C": None, "RW": None, 
+                                   "LD": None, "RD": None}
+        session_manager.lines[3] = {"LW": None, "C": None, "RW": None, 
+                                   "LD": None, "RD": None}
         
         # Add players from CSV
         for row in csv_reader:
@@ -214,18 +243,19 @@ def upload_team():
                         "jersey_number": jersey_number,
                         "roster_position": position,  # FORWARD, DEFENSE, GOALIE
                         "affiliate": affiliate == "YES",
-                        "id": len(manager.players) + 1
+                        "id": len(session_manager.players) + 1
                     }
-                    manager.players.append(player)
+                    session_manager.players.append(player)
         
-        manager.save_data()
-        return jsonify({"success": True, "message": f"Team uploaded successfully! Added {len(manager.players)} players."})
+        session_manager.save_data()
+        return jsonify({"success": True, "message": f"Team uploaded successfully! Added {len(session_manager.players)} players."})
         
     except Exception as e:
         return jsonify({"success": False, "message": f"Error processing file: {str(e)}"})
 
 @app.route('/api/teams/download', methods=['GET'])
 def download_team():
+    manager = get_manager()
     try:
         # Create CSV content
         output = io.StringIO()
@@ -256,16 +286,18 @@ def download_team():
 
 @app.route('/api/teams/save', methods=['POST'])
 def save_team():
+    # Get current session data
+    session_manager = get_manager()
     data = request.json
     team_name = data.get('team_name', 'hockey_team').strip()
     
     if not team_name:
         team_name = 'hockey_team'
     
-    # Create a copy of current data
+    # Create a copy of current session data to save as shared team
     team_data = {
-        "players": manager.players,
-        "lines": manager.lines,
+        "players": session_manager.players,
+        "lines": session_manager.lines,
         "last_updated": datetime.now().isoformat(),
         "team_name": team_name
     }
@@ -283,6 +315,8 @@ def save_team():
 
 @app.route('/api/teams/load', methods=['POST'])
 def load_team():
+    # Get current session manager to load data into
+    session_manager = get_manager()
     data = request.json
     filename = data.get('filename', 'hockey_team.json')
     
@@ -295,9 +329,10 @@ def load_team():
         with open(filepath, 'r') as f:
             team_data = json.load(f)
         
-        manager.players = team_data.get("players", [])
-        manager.lines = team_data.get("lines", manager.lines)
-        manager.save_data()
+        # Load shared team data into current session
+        session_manager.players = team_data.get("players", [])
+        session_manager.lines = team_data.get("lines", session_manager.lines)
+        session_manager.save_data()
         
         return jsonify({"success": True, "message": f"Team loaded successfully!"})
     except Exception as e:
@@ -334,8 +369,288 @@ def list_teams():
 
 
 
+@app.route('/api/lines/save', methods=['POST'])
+def save_lines():
+    """Save current lines with a name and generate a shareable URL"""
+    manager = get_manager()
+    data = request.json
+    line_name = data.get('name', 'My Lines').strip()
+    
+    if not line_name:
+        return jsonify({"success": False, "message": "Please provide a name for your lines"})
+    
+    # Generate unique ID for the lines
+    line_id = generate_line_id()
+    
+    # Create line data
+    line_data = {
+        "name": line_name,
+        "lines": manager.lines,
+        "players": manager.players,  # Include players so others can see who's in each position
+        "created": datetime.now().isoformat(),
+        "line_id": line_id
+    }
+    
+    # Save to shared lines directory
+    filename = f"{line_id}.json"
+    filepath = os.path.join(os.getcwd(), 'data', 'shared_lines', filename)
+    
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    
+    try:
+        with open(filepath, 'w') as f:
+            json.dump(line_data, f, indent=2)
+        
+        # Generate shareable URL
+        share_url = f"{request.host_url}lines/{line_id}"
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Lines saved as '{line_name}'",
+            "share_url": share_url,
+            "line_id": line_id
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error saving lines: {str(e)}"})
+
+@app.route('/lines/<line_id>')
+def view_shared_lines(line_id):
+    """View shared lines via URL"""
+    try:
+        filepath = os.path.join(os.getcwd(), 'data', 'shared_lines', f"{line_id}.json")
+        
+        if not os.path.exists(filepath):
+            return "Lines not found or have been removed.", 404
+        
+        with open(filepath, 'r') as f:
+            line_data = json.load(f)
+        
+        # Create a view-only HTML page
+        html_content = f'''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>SKAHL Line Builder - {line_data['name']}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {{ 
+                    font-family: Arial, sans-serif; 
+                    margin: 20px; 
+                    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+                    color: white;
+                    min-height: 100vh;
+                }}
+                .container {{
+                    max-width: 800px;
+                    margin: 0 auto;
+                    background: rgba(255,255,255,0.1);
+                    padding: 30px;
+                    border-radius: 15px;
+                    backdrop-filter: blur(10px);
+                }}
+                .header {{ 
+                    text-align: center; 
+                    margin-bottom: 40px; 
+                    border-bottom: 3px solid #fbbf24;
+                    padding-bottom: 20px;
+                }}
+                .header h1 {{
+                    color: #fbbf24;
+                    font-size: 28px;
+                    margin-bottom: 5px;
+                }}
+                .header h2 {{
+                    color: #3b82f6;
+                    font-size: 20px;
+                    margin: 0;
+                }}
+                .line-section {{ 
+                    margin-bottom: 35px; 
+                    background: rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                    padding: 20px;
+                    border: 2px solid rgba(255,255,255,0.2);
+                }}
+                .line-title {{ 
+                    font-size: 20px; 
+                    font-weight: bold; 
+                    margin-bottom: 15px; 
+                    color: #fbbf24;
+                    text-align: center;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }}
+                .positions {{ 
+                    display: flex; 
+                    gap: 12px; 
+                    margin-bottom: 12px; 
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }}
+                .position {{ 
+                    border: 2px solid #fbbf24; 
+                    padding: 12px 8px; 
+                    min-width: 100px; 
+                    text-align: center; 
+                    background: rgba(255,255,255,0.1);
+                    border-radius: 6px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                }}
+                .position-label {{ 
+                    font-weight: bold; 
+                    color: #fbbf24; 
+                    margin-bottom: 8px; 
+                    font-size: 12px;
+                    text-transform: uppercase;
+                }}
+                .player-name {{ 
+                    font-weight: bold; 
+                    color: white;
+                    font-size: 14px;
+                }}
+                .empty-position {{
+                    color: #ccc;
+                    font-style: italic;
+                }}
+                .goalie-position {{
+                    border: 2px solid #fbbf24;
+                    background: rgba(251, 191, 36, 0.2);
+                }}
+                .goalie-position .position-label {{
+                    color: #fbbf24;
+                }}
+                .footer {{
+                    text-align: center;
+                    margin-top: 40px;
+                    padding-top: 20px;
+                    border-top: 2px solid rgba(255,255,255,0.2);
+                    color: #ccc;
+                }}
+                .load-button {{
+                    background: #fbbf24;
+                    color: #1e3a8a;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-top: 20px;
+                    text-decoration: none;
+                    display: inline-block;
+                }}
+                .load-button:hover {{
+                    background: #f59e0b;
+                    transform: translateY(-2px);
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>SKAHL Line Builder</h1>
+                    <h2>{line_data['name']}</h2>
+                    <p>Shared on {datetime.fromisoformat(line_data['created']).strftime('%B %d, %Y at %I:%M %p')}</p>
+                </div>
+        '''
+        
+        # Add each line
+        for line_num, line in line_data['lines'].items():
+            html_content += f'''
+                <div class="line-section">
+                    <div class="line-title">Line {line_num}</div>
+            '''
+            
+            # Add forwards row (only if there are forwards)
+            forwards = []
+            if line.get('LW'): forwards.append(('LW', line['LW']['name']))
+            if line.get('C'): forwards.append(('C', line['C']['name']))
+            if line.get('RW'): forwards.append(('RW', line['RW']['name']))
+            
+            if forwards:
+                html_content += '<div class="positions">'
+                for pos, name in forwards:
+                    html_content += f'''
+                    <div class="position">
+                        <div class="position-label">{pos}</div>
+                        <div class="player-name">{name}</div>
+                    </div>
+                    '''
+                html_content += '</div>'
+            
+            # Add defense row (only if there are defensemen)
+            defense = []
+            if line.get('LD'): defense.append(('LD', line['LD']['name']))
+            if line.get('RD'): defense.append(('RD', line['RD']['name']))
+            
+            if defense:
+                html_content += '<div class="positions">'
+                for pos, name in defense:
+                    html_content += f'''
+                    <div class="position">
+                        <div class="position-label">{pos}</div>
+                        <div class="player-name">{name}</div>
+                    </div>
+                    '''
+                html_content += '</div>'
+            
+            # Add goalie (only for line 1)
+            if line_num == "1" and line.get('G'):
+                html_content += f'''
+                <div class="positions">
+                    <div class="position goalie-position">
+                        <div class="position-label">G</div>
+                        <div class="player-name">{line['G']['name']}</div>
+                    </div>
+                </div>
+                '''
+            
+            html_content += '</div>'
+        
+        html_content += f'''
+                <div class="footer">
+                    <p>Want to use these lines in your own session?</p>
+                    <a href="{request.host_url}" class="load-button">Open SKAHL Line Builder</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        '''
+        
+        return html_content
+        
+    except Exception as e:
+        return f"Error loading shared lines: {str(e)}", 500
+
+@app.route('/api/lines/load-shared/<line_id>', methods=['POST'])
+def load_shared_lines(line_id):
+    """Load shared lines into current session"""
+    try:
+        filepath = os.path.join(os.getcwd(), 'data', 'shared_lines', f"{line_id}.json")
+        
+        if not os.path.exists(filepath):
+            return jsonify({"success": False, "message": "Shared lines not found"})
+        
+        with open(filepath, 'r') as f:
+            line_data = json.load(f)
+        
+        # Load into current session
+        manager = get_manager()
+        manager.lines = line_data['lines']
+        manager.save_data()
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Loaded '{line_data['name']}' into your session"
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error loading shared lines: {str(e)}"})
+
 @app.route('/api/print-lines', methods=['GET'])
 def print_lines():
+    manager = get_manager()
     try:
         # Get current date
         current_date = datetime.now().strftime("%B %d, %Y")
@@ -1347,6 +1662,7 @@ if __name__ == '__main__':
                     </label>
                     <button onclick="addPlayer()">Add Player</button>
                     <button onclick="printLines()" style="background: #dc3545;">🖨️ Print Lines</button>
+                    <button onclick="saveAndShareLines()" style="background: #28a745;">🔗 Save & Share Lines</button>
                 </div>
             </div>
         </div>
@@ -1930,6 +2246,108 @@ if __name__ == '__main__':
             } else {
                 alert('Please allow popups to print lines');
             }
+        }
+
+        async function saveAndShareLines() {
+            const lineName = prompt('Enter a name for your lines:');
+            if (!lineName || lineName.trim() === '') {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/lines/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: lineName.trim() })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Create a modal to show the share URL
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.8);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 1000;
+                    `;
+                    
+                    modal.innerHTML = `
+                        <div style="
+                            background: white;
+                            padding: 30px;
+                            border-radius: 15px;
+                            max-width: 500px;
+                            text-align: center;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                        ">
+                            <h2 style="color: #1e3a8a; margin-bottom: 20px;">🎉 Lines Saved Successfully!</h2>
+                            <p style="margin-bottom: 20px; color: #333;">Your lines "${lineName}" have been saved and can be shared with others.</p>
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; color: #666; font-weight: bold;">Share this URL:</label>
+                                <input type="text" value="${result.share_url}" readonly style="
+                                    width: 100%;
+                                    padding: 10px;
+                                    border: 2px solid #ddd;
+                                    border-radius: 5px;
+                                    font-family: monospace;
+                                    background: #f8f9fa;
+                                ">
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: center;">
+                                <button onclick="copyToClipboard('${result.share_url}')" style="
+                                    background: #28a745;
+                                    color: white;
+                                    border: none;
+                                    padding: 10px 20px;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                ">📋 Copy URL</button>
+                                <button onclick="this.closest('div[style*=\\"position: fixed\\"]').remove()" style="
+                                    background: #6c757d;
+                                    color: white;
+                                    border: none;
+                                    padding: 10px 20px;
+                                    border-radius: 5px;
+                                    cursor: pointer;
+                                ">Close</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                } else {
+                    alert('Error saving lines: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error saving lines:', error);
+                alert('Error saving lines. Please try again.');
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('URL copied to clipboard!');
+            }, function(err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('URL copied to clipboard!');
+            });
         }
 
         // Click-to-select functionality
