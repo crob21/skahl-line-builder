@@ -459,6 +459,24 @@ def view_shared_lines(line_id):
                     color: #fbbf24;
                     font-size: 28px;
                     margin-bottom: 5px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 15px;
+                }}
+                .logo {{
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }}
+                .logo img {{
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
                 }}
                 .header h2 {{
                     color: #3b82f6;
@@ -735,6 +753,24 @@ def print_lines():
                     color: #1e3a8a;
                     font-size: 28px;
                     margin-bottom: 5px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 15px;
+                }}
+                .logo {{
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }}
+                .logo img {{
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
                 }}
                 .header h2 {{
                     color: #3b82f6;
@@ -952,8 +988,8 @@ if __name__ == '__main__':
         }
         
         .logo {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             display: flex;
