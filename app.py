@@ -312,7 +312,7 @@ def list_teams():
             return jsonify([])
             
         for filename in os.listdir(directory):
-            if filename.endswith('.json'):
+            if filename.endswith('.json') and filename not in ['current_session.json']:
                 filepath = os.path.join(directory, filename)
                 try:
                     with open(filepath, 'r') as f:
@@ -536,8 +536,11 @@ if __name__ == '__main__':
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SKAHL Line Builder</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
     <style>
         * {
             margin: 0;
@@ -1044,17 +1047,245 @@ if __name__ == '__main__':
             background: #555;
         }
 
+        /* Mobile Optimizations */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .container {
+                max-width: 100%;
+                margin: 0;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+            }
+            
+            .controls {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .team-management h3, .player-management h3 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+            
+            .team-controls {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .team-section {
+                min-height: auto;
+                padding: 12px;
+            }
+            
+            .team-section h4 {
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+            
+            .team-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .team-controls input[type="text"], 
+            .team-controls select,
+            .add-player-form input,
+            .add-player-form select {
+                width: 100%;
+                min-width: auto;
+                padding: 10px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .add-player-form {
+                flex-direction: column;
+                gap: 8px;
+                padding: 15px;
+            }
+            
+            .add-player-form label {
+                justify-content: center;
+                margin: 5px 0;
+            }
+            
+            .btn-upload, .btn-download, .btn-save, .btn-load,
+            .add-player-form button {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+                margin: 2px 0;
+            }
+            
             .main-content {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .left-panel {
+                max-height: none;
+                overflow-y: visible;
+            }
+            
+            .bench, .spares {
+                max-height: 200px;
+                padding: 15px;
+                margin-bottom: 10px;
+            }
+            
+            .bench h2, .spares h2 {
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+            }
+            
+            .ice-rink {
+                min-height: auto;
+                padding: 15px;
+            }
+            
+            .line-section {
+                margin-bottom: 20px;
+                padding: 15px;
+            }
+            
+            .line-title {
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+            }
+            
+            .positions {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+            
+            .defense-positions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .position-slot {
+                width: 100%;
+                height: 60px;
+                min-width: auto;
+            }
+            
+            .goalie-position {
+                width: 100%;
+                height: 60px;
+                grid-column: span 3;
+            }
+            
+            .player-card {
+                padding: 6px 8px;
+                margin-bottom: 6px;
+                font-size: 12px;
+            }
+            
+            .player-card.in-position {
+                padding: 4px 2px;
+                font-size: 11px;
+            }
+            
+            .position-label {
+                font-size: 0.7rem;
+                margin-bottom: 3px;
+            }
+            
+            .player-name {
+                font-size: 11px;
+                margin-bottom: 1px;
+            }
+            
+            .clear-line {
+                width: 100%;
+                padding: 8px;
+                font-size: 12px;
+                margin-top: 8px;
+            }
+            
+            /* Touch-friendly improvements */
+            .player-card {
+                min-height: 44px; /* iOS minimum touch target */
+            }
+            
+            .position-slot {
+                min-height: 44px;
+            }
+            
+            button {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            /* Prevent horizontal scroll */
+            .container {
+                overflow-x: hidden;
+            }
+            
+            /* Better spacing for mobile */
+            .team-management, .player-management {
+                margin-top: 15px;
+                padding-top: 15px;
+            }
+        }
+        
+        /* iPhone SE and smaller screens */
+        @media (max-width: 375px) {
+            body {
+                padding: 5px;
+            }
+            
+            .controls {
+                padding: 10px;
+            }
+            
+            .team-section, .line-section {
+                padding: 10px;
             }
             
             .positions {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 5px;
+            }
+            
+            .defense-positions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 5px;
             }
             
             .goalie-position {
                 grid-column: span 2;
+            }
+            
+            .position-slot {
+                height: 50px;
+            }
+            
+            .goalie-position {
+                height: 50px;
+            }
+        }
+        
+        /* Landscape orientation on mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-content {
+                grid-template-columns: 200px 1fr;
+                gap: 10px;
+            }
+            
+            .bench, .spares {
+                max-height: 150px;
+            }
+            
+            .ice-rink {
+                min-height: 400px;
             }
         }
     </style>
@@ -1678,6 +1909,80 @@ if __name__ == '__main__':
                 alert('Please allow popups to print lines');
             }
         }
+
+        // Mobile touch improvements
+        function setupMobileTouch() {
+            // Prevent zoom on double tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            // Improve touch scrolling
+            document.addEventListener('touchmove', function(event) {
+                if (event.scale !== 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+
+            // Add touch feedback for buttons
+            document.querySelectorAll('button').forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                button.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+
+            // Improve drag and drop for touch devices
+            let touchStartX, touchStartY, touchStartTime;
+            let isDragging = false;
+
+            document.addEventListener('touchstart', function(e) {
+                if (e.target.closest('.player-card')) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    touchStartTime = Date.now();
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchmove', function(e) {
+                if (touchStartX !== undefined) {
+                    const touchEndX = e.touches[0].clientX;
+                    const touchEndY = e.touches[0].clientY;
+                    const distance = Math.sqrt(
+                        Math.pow(touchEndX - touchStartX, 2) + 
+                        Math.pow(touchEndY - touchStartY, 2)
+                    );
+                    
+                    if (distance > 10) { // Minimum drag distance
+                        isDragging = true;
+                        e.preventDefault();
+                    }
+                }
+            }, { passive: false });
+
+            document.addEventListener('touchend', function(e) {
+                if (isDragging) {
+                    isDragging = false;
+                    // Handle touch-based drag and drop here if needed
+                }
+                touchStartX = undefined;
+                touchStartY = undefined;
+                touchStartTime = undefined;
+            }, { passive: true });
+        }
+
+        // Initialize mobile optimizations when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setupMobileTouch();
+        });
     </script>
 </body>
 </html>'''
