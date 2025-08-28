@@ -37,7 +37,7 @@ class HockeyTeamManager:
             except (json.JSONDecodeError, KeyError):
                 pass
     
-    def add_player(self, name, position):
+    def add_player(self, name, position, jersey_number="", affiliate=False):
         if any(p["name"].lower() == name.lower() for p in self.players):
             return {"success": False, "message": f"{name} already exists"}
         
@@ -48,6 +48,8 @@ class HockeyTeamManager:
         player = {
             "name": name.strip(),
             "position": position.upper(),
+            "jersey_number": jersey_number.strip(),
+            "affiliate": affiliate,
             "id": len(self.players) + 1
         }
         
@@ -112,7 +114,9 @@ def get_players():
 @app.route('/api/players', methods=['POST'])
 def add_player():
     data = request.json
-    result = manager.add_player(data['name'], data['position'])
+    jersey_number = data.get('jersey_number', '')
+    affiliate = data.get('affiliate', False)
+    result = manager.add_player(data['name'], data['position'], jersey_number, affiliate)
     return jsonify(result)
 
 @app.route('/api/players/<int:player_id>', methods=['DELETE'])
@@ -173,15 +177,25 @@ def upload_team():
         
         # Add players from CSV
         for row in csv_reader:
-            name = row.get('name', '').strip()
+            last_name = row.get('last_name', '').strip()
+            first_name = row.get('first_name', '').strip()
+            jersey_number = row.get('jersey_number', '').strip()
             position = row.get('position', '').strip().upper()
+            affiliate = row.get('affiliate', '').strip().upper()
             
-            if name and position:
+            if last_name and first_name and position:
                 valid_positions = ["C", "LW", "RW", "LD", "RD", "G"]
                 if position in valid_positions:
+                    # Create full name
+                    full_name = f"{first_name} {last_name}"
+                    
                     player = {
-                        "name": name,
+                        "name": full_name,
+                        "first_name": first_name,
+                        "last_name": last_name,
+                        "jersey_number": jersey_number,
                         "position": position,
+                        "affiliate": affiliate == "YES",
                         "id": len(manager.players) + 1
                     }
                     manager.players.append(player)
@@ -198,10 +212,17 @@ def download_team():
         # Create CSV content
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow(['name', 'position'])
+        writer.writerow(['last_name', 'first_name', 'jersey_number', 'position', 'affiliate'])
         
         for player in manager.players:
-            writer.writerow([player['name'], player['position']])
+            affiliate_status = "YES" if player.get('affiliate', False) else "NO"
+            writer.writerow([
+                player.get('last_name', ''),
+                player.get('first_name', ''),
+                player.get('jersey_number', ''),
+                player['position'],
+                affiliate_status
+            ])
         
         output.seek(0)
         
@@ -720,9 +741,17 @@ if __name__ == '__main__':
             backdrop-filter: blur(10px);
         }
 
-        .bench h2 {
+        .bench h2, .spares h2 {
             margin-bottom: 15px;
             text-align: center;
+        }
+
+        .spares {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
         }
 
         .ice-rink {
@@ -837,6 +866,15 @@ if __name__ == '__main__':
             padding: 4px 8px;
         }
 
+        .spare-player {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border: 1px solid #e55a2b;
+        }
+
+        .spare-player:hover {
+            background: linear-gradient(135deg, #e55a2b, #e8690b);
+        }
+
         .player-name {
             font-weight: bold;
             margin-bottom: 2px;
@@ -933,7 +971,8 @@ if __name__ == '__main__':
             <div class="player-management">
                 <h3>👥 Player Management</h3>
                 <div class="add-player-form">
-                    <input type="text" id="playerName" placeholder="Player Name" maxlength="20">
+                    <input type="text" id="playerName" placeholder="Player Name" maxlength="30">
+                    <input type="text" id="jerseyNumber" placeholder="Jersey #" maxlength="3" style="width: 80px;">
                     <select id="playerPosition">
                         <option value="C">Center</option>
                         <option value="LW">Left Wing</option>
@@ -942,6 +981,10 @@ if __name__ == '__main__':
                         <option value="RD">Right Defense</option>
                         <option value="G">Goalie</option>
                     </select>
+                    <label style="display: flex; align-items: center; gap: 5px; color: white;">
+                        <input type="checkbox" id="isAffiliate" style="margin: 0;">
+                        Affiliate Player
+                    </label>
                     <button onclick="addPlayer()">Add Player</button>
                     <button onclick="addSamplePlayers()" style="background: #28a745;">Add Sample Players</button>
                     <button onclick="printLines()" style="background: #dc3545;">🖨️ Print Lines</button>
@@ -953,6 +996,11 @@ if __name__ == '__main__':
             <div class="bench">
                 <h2>🪑 Bench</h2>
                 <div id="benchPlayers"></div>
+            </div>
+            
+            <div class="spares">
+                <h2>🔄 Spares</h2>
+                <div id="sparePlayers"></div>
             </div>
 
             <div class="ice-rink">
@@ -1061,6 +1109,8 @@ if __name__ == '__main__':
         async function addPlayer() {
             const name = document.getElementById('playerName').value.trim();
             const position = document.getElementById('playerPosition').value;
+            const jerseyNumber = document.getElementById('jerseyNumber').value.trim();
+            const isAffiliate = document.getElementById('isAffiliate').checked;
             
             if (!name) {
                 alert('Please enter a player name');
@@ -1070,13 +1120,20 @@ if __name__ == '__main__':
             const response = await fetch('/api/players', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, position })
+                body: JSON.stringify({ 
+                    name, 
+                    position, 
+                    jersey_number: jerseyNumber,
+                    affiliate: isAffiliate
+                })
             });
             
             const result = await response.json();
             
             if (result.success) {
                 document.getElementById('playerName').value = '';
+                document.getElementById('jerseyNumber').value = '';
+                document.getElementById('isAffiliate').checked = false;
                 loadPlayers();
             } else {
                 alert(result.message);
@@ -1085,18 +1142,20 @@ if __name__ == '__main__':
 
         async function addSamplePlayers() {
             const samplePlayers = [
-                { name: 'Connor McDavid', position: 'C' },
-                { name: 'Alex Ovechkin', position: 'LW' },
-                { name: 'David Pastrnak', position: 'RW' },
-                { name: 'Erik Karlsson', position: 'LD' },
-                { name: 'Cale Makar', position: 'RD' },
-                { name: 'Igor Shesterkin', position: 'G' },
-                { name: 'Sidney Crosby', position: 'C' },
-                { name: 'Brad Marchand', position: 'LW' },
-                { name: 'Mitch Marner', position: 'RW' },
-                { name: 'Victor Hedman', position: 'LD' },
-                { name: 'Aaron Ekblad', position: 'RD' },
-                { name: 'Frederik Andersen', position: 'G' }
+                { name: 'Connor McDavid', position: 'C', jersey_number: '97', affiliate: false },
+                { name: 'Alex Ovechkin', position: 'LW', jersey_number: '8', affiliate: false },
+                { name: 'David Pastrnak', position: 'RW', jersey_number: '88', affiliate: false },
+                { name: 'Erik Karlsson', position: 'LD', jersey_number: '65', affiliate: false },
+                { name: 'Cale Makar', position: 'RD', jersey_number: '8', affiliate: false },
+                { name: 'Igor Shesterkin', position: 'G', jersey_number: '31', affiliate: false },
+                { name: 'Sidney Crosby', position: 'C', jersey_number: '87', affiliate: false },
+                { name: 'Brad Marchand', position: 'LW', jersey_number: '63', affiliate: false },
+                { name: 'Mitch Marner', position: 'RW', jersey_number: '16', affiliate: false },
+                { name: 'Victor Hedman', position: 'LD', jersey_number: '77', affiliate: false },
+                { name: 'Aaron Ekblad', position: 'RD', jersey_number: '5', affiliate: false },
+                { name: 'Frederik Andersen', position: 'G', jersey_number: '31', affiliate: false },
+                { name: 'Craig Robinson', position: 'LD', jersey_number: '13', affiliate: true },
+                { name: 'John Smith', position: 'C', jersey_number: '22', affiliate: true }
             ];
             
             for (const player of samplePlayers) {
@@ -1126,7 +1185,9 @@ if __name__ == '__main__':
             const players = await response.json();
             
             const benchDiv = document.getElementById('benchPlayers');
+            const sparesDiv = document.getElementById('sparePlayers');
             benchDiv.innerHTML = '';
+            sparesDiv.innerHTML = '';
             
             // Get players currently in lines
             const linesResponse = await fetch('/api/lines');
@@ -1139,22 +1200,35 @@ if __name__ == '__main__':
                 });
             });
             
-            // Show only bench players
-            const benchPlayers = players.filter(p => !playersInLines.has(p.id));
+            // Separate regular players and spares
+            const regularPlayers = players.filter(p => !playersInLines.has(p.id) && !p.affiliate);
+            const sparePlayers = players.filter(p => !playersInLines.has(p.id) && p.affiliate);
             
-            benchPlayers.forEach(player => {
+            // Show regular bench players
+            regularPlayers.forEach(player => {
                 const playerCard = createPlayerCard(player);
                 benchDiv.appendChild(playerCard);
+            });
+            
+            // Show spare players
+            sparePlayers.forEach(player => {
+                const playerCard = createPlayerCard(player);
+                sparesDiv.appendChild(playerCard);
             });
         }
 
         function createPlayerCard(player) {
             const card = document.createElement('div');
             card.className = 'player-card';
+            if (player.affiliate) {
+                card.classList.add('spare-player');
+            }
             card.draggable = true;
             card.dataset.playerId = player.id;
+            
+            const jerseyDisplay = player.jersey_number ? `#${player.jersey_number}` : '';
             card.innerHTML = `
-                <div class="player-name">${player.name}</div>
+                <div class="player-name">${player.name} ${jerseyDisplay}</div>
                 <div class="player-position">${player.position}</div>
                 <button onclick="removePlayer(${player.id})" class="remove-btn">×</button>
             `;

@@ -1,0 +1,100 @@
+{
+  "players": [
+    {
+      "name": "Connor McDavid",
+      "position": "C",
+      "id": 1
+    },
+    {
+      "name": "Alex Ovechkin",
+      "position": "LW",
+      "id": 2
+    },
+    {
+      "name": "David Pastrnak",
+      "position": "RW",
+      "id": 3
+    },
+    {
+      "name": "Erik Karlsson",
+      "position": "LD",
+      "id": 4
+    },
+    {
+      "name": "Cale Makar",
+      "position": "RD",
+      "id": 5
+    },
+    {
+      "name": "Igor Shesterkin",
+      "position": "G",
+      "id": 6
+    },
+    {
+      "name": "Sidney Crosby",
+      "position": "C",
+      "id": 7
+    },
+    {
+      "name": "Brad Marchand",
+      "position": "LW",
+      "id": 8
+    },
+    {
+      "name": "Mitch Marner",
+      "position": "RW",
+      "id": 9
+    },
+    {
+      "name": "Victor Hedman",
+      "position": "LD",
+      "id": 10
+    },
+    {
+      "name": "Aaron Ekblad",
+      "position": "RD",
+      "id": 11
+    },
+    {
+      "name": "Frederik Andersen",
+      "position": "G",
+      "id": 12
+    },
+    {
+      "name": "Craig Robinson",
+      "position": "LD",
+      "id": 13
+    }
+  ],
+  "lines": {
+    "1": {
+      "LW": null,
+      "C": null,
+      "RW": null,
+      "LD": null,
+      "RD": null,
+      "G": null
+    },
+    "2": {
+      "LW": null,
+      "C": {
+        "name": "Craig Robinson",
+        "position": "LD",
+        "id": 13
+      },
+      "RW": null,
+      "LD": null,
+      "RD": null,
+      "G": null
+    },
+    "3": {
+      "LW": null,
+      "C": null,
+      "RW": null,
+      "LD": null,
+      "RD": null,
+      "G": null
+    }
+  },
+  "last_updated": "2025-08-27T19:50:47.007314"
+}

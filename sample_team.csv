@@ -1,13 +1,15 @@
-name,position
-Connor McDavid,C
-Alex Ovechkin,LW
-David Pastrnak,RW
-Erik Karlsson,LD
-Cale Makar,RD
-Igor Shesterkin,G
-Sidney Crosby,C
-Brad Marchand,LW
-Mitch Marner,RW
-Victor Hedman,LD
-Aaron Ekblad,RD
-Frederik Andersen,G
+last_name,first_name,jersey_number,position,affiliate
+McDavid,Connor,97,C,NO
+Ovechkin,Alex,8,LW,NO
+Pastrnak,David,88,RW,NO
+Karlsson,Erik,65,LD,NO
+Makar,Cale,8,RD,NO
+Shesterkin,Igor,31,G,NO
+Crosby,Sidney,87,C,NO
+Marchand,Brad,63,LW,NO
+Marner,Mitch,16,RW,NO
+Hedman,Victor,77,LD,NO
+Ekblad,Aaron,5,RD,NO
+Andersen,Frederik,31,G,NO
+Robinson,Craig,13,LD,YES
+Smith,John,22,C,YES
