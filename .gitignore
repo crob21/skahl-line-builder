@@ -135,6 +135,7 @@ data/teams/*.json
 # Ignore current session file
 data/teams/current_session.json
 data/sessions/
+data/shared_lines/
 
 # IDE files
 .vscode/
