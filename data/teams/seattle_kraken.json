@@ -28,10 +28,10 @@
       "id": 3
     },
     {
-      "name": "Alexander Wennberg",
-      "first_name": "Alexander",
-      "last_name": "Wennberg",
-      "jersey_number": "21",
+      "name": "Matty Beniers",
+      "first_name": "Matty",
+      "last_name": "Beniers",
+      "jersey_number": "10",
       "roster_position": "FORWARD",
       "affiliate": false,
       "id": 4
@@ -82,13 +82,22 @@
       "id": 9
     },
     {
-      "name": "Pierre-Edouard Bellemare",
-      "first_name": "Pierre-Edouard",
-      "last_name": "Bellemare",
-      "jersey_number": "41",
+      "name": "Shane Wright",
+      "first_name": "Shane",
+      "last_name": "Wright",
+      "jersey_number": "51",
       "roster_position": "FORWARD",
       "affiliate": false,
       "id": 10
+    },
+    {
+      "name": "Eeli Tolvanen",
+      "first_name": "Eeli",
+      "last_name": "Tolvanen",
+      "jersey_number": "20",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 11
     },
     {
       "name": "Vince Dunn",
@@ -97,7 +106,7 @@
       "jersey_number": "29",
       "roster_position": "DEFENSE",
       "affiliate": false,
-      "id": 11
+      "id": 12
     },
     {
       "name": "Adam Larsson",
@@ -106,7 +115,7 @@
       "jersey_number": "6",
       "roster_position": "DEFENSE",
       "affiliate": false,
-      "id": 12
+      "id": 13
     },
     {
       "name": "Jamie Oleksiak",
@@ -115,7 +124,7 @@
       "jersey_number": "24",
       "roster_position": "DEFENSE",
       "affiliate": false,
-      "id": 13
+      "id": 14
     },
     {
       "name": "Will Borgen",
@@ -124,25 +133,25 @@
       "jersey_number": "3",
       "roster_position": "DEFENSE",
       "affiliate": false,
-      "id": 14
-    },
-    {
-      "name": "Vince Evans",
-      "first_name": "Vince",
-      "last_name": "Evans",
-      "jersey_number": "5",
-      "roster_position": "DEFENSE",
-      "affiliate": false,
       "id": 15
     },
     {
-      "name": "Evans Ryker",
-      "first_name": "Evans",
-      "last_name": "Ryker",
+      "name": "Ryker Evans",
+      "first_name": "Ryker",
+      "last_name": "Evans",
       "jersey_number": "4",
       "roster_position": "DEFENSE",
       "affiliate": false,
       "id": 16
+    },
+    {
+      "name": "Justin Schultz",
+      "first_name": "Justin",
+      "last_name": "Schultz",
+      "jersey_number": "5",
+      "roster_position": "DEFENSE",
+      "affiliate": false,
+      "id": 17
     },
     {
       "name": "Joey Daccord",
@@ -151,16 +160,16 @@
       "jersey_number": "35",
       "roster_position": "GOALIE",
       "affiliate": false,
-      "id": 17
+      "id": 18
     },
     {
-      "name": "Chris Driedger",
-      "first_name": "Chris",
-      "last_name": "Driedger",
-      "jersey_number": "60",
+      "name": "Philipp Grubauer",
+      "first_name": "Philipp",
+      "last_name": "Grubauer",
+      "jersey_number": "31",
       "roster_position": "GOALIE",
       "affiliate": false,
-      "id": 18
+      "id": 19
     }
   ],
   "lines": {
@@ -187,6 +196,6 @@
       "RD": null
     }
   },
-  "last_updated": "2025-08-27T20:12:00",
+  "last_updated": "2025-08-27T22:10:00",
   "team_name": "Seattle Kraken"
 }
