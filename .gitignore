@@ -132,7 +132,8 @@ dmypy.json
 data/teams/*.json
 !data/teams/seattle_kraken.json
 !data/teams/jackalopes.json
-!data/teams/hockey_team.json
+# Ignore current session file
+data/teams/current_session.json
 
 # IDE files
 .vscode/
