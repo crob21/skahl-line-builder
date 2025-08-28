@@ -1,0 +1,192 @@
+{
+  "players": [
+    {
+      "name": "Jared McCann",
+      "first_name": "Jared",
+      "last_name": "McCann",
+      "jersey_number": "19",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 1
+    },
+    {
+      "name": "Jordan Eberle",
+      "first_name": "Jordan",
+      "last_name": "Eberle",
+      "jersey_number": "7",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 2
+    },
+    {
+      "name": "Jaden Schwartz",
+      "first_name": "Jaden",
+      "last_name": "Schwartz",
+      "jersey_number": "17",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 3
+    },
+    {
+      "name": "Alexander Wennberg",
+      "first_name": "Alexander",
+      "last_name": "Wennberg",
+      "jersey_number": "21",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 4
+    },
+    {
+      "name": "Yanni Gourde",
+      "first_name": "Yanni",
+      "last_name": "Gourde",
+      "jersey_number": "37",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 5
+    },
+    {
+      "name": "Brandon Tanev",
+      "first_name": "Brandon",
+      "last_name": "Tanev",
+      "jersey_number": "13",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 6
+    },
+    {
+      "name": "Andre Burakovsky",
+      "first_name": "Andre",
+      "last_name": "Burakovsky",
+      "jersey_number": "95",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 7
+    },
+    {
+      "name": "Oliver Bjorkstrand",
+      "first_name": "Oliver",
+      "last_name": "Bjorkstrand",
+      "jersey_number": "22",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 8
+    },
+    {
+      "name": "Tye Kartye",
+      "first_name": "Tye",
+      "last_name": "Kartye",
+      "jersey_number": "52",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 9
+    },
+    {
+      "name": "Pierre-Edouard Bellemare",
+      "first_name": "Pierre-Edouard",
+      "last_name": "Bellemare",
+      "jersey_number": "41",
+      "roster_position": "FORWARD",
+      "affiliate": false,
+      "id": 10
+    },
+    {
+      "name": "Vince Dunn",
+      "first_name": "Vince",
+      "last_name": "Dunn",
+      "jersey_number": "29",
+      "roster_position": "DEFENSE",
+      "affiliate": false,
+      "id": 11
+    },
+    {
+      "name": "Adam Larsson",
+      "first_name": "Adam",
+      "last_name": "Larsson",
+      "jersey_number": "6",
+      "roster_position": "DEFENSE",
+      "affiliate": false,
+      "id": 12
+    },
+    {
+      "name": "Jamie Oleksiak",
+      "first_name": "Jamie",
+      "last_name": "Oleksiak",
+      "jersey_number": "24",
+      "roster_position": "DEFENSE",
+      "affiliate": false,
+      "id": 13
+    },
+    {
+      "name": "Will Borgen",
+      "first_name": "Will",
+      "last_name": "Borgen",
+      "jersey_number": "3",
+      "roster_position": "DEFENSE",
+      "affiliate": false,
+      "id": 14
+    },
+    {
+      "name": "Vince Evans",
+      "first_name": "Vince",
+      "last_name": "Evans",
+      "jersey_number": "5",
+      "roster_position": "DEFENSE",
+      "affiliate": false,
+      "id": 15
+    },
+    {
+      "name": "Evans Ryker",
+      "first_name": "Evans",
+      "last_name": "Ryker",
+      "jersey_number": "4",
+      "roster_position": "DEFENSE",
+      "affiliate": false,
+      "id": 16
+    },
+    {
+      "name": "Joey Daccord",
+      "first_name": "Joey",
+      "last_name": "Daccord",
+      "jersey_number": "35",
+      "roster_position": "GOALIE",
+      "affiliate": false,
+      "id": 17
+    },
+    {
+      "name": "Chris Driedger",
+      "first_name": "Chris",
+      "last_name": "Driedger",
+      "jersey_number": "60",
+      "roster_position": "GOALIE",
+      "affiliate": false,
+      "id": 18
+    }
+  ],
+  "lines": {
+    "1": {
+      "LW": null,
+      "C": null,
+      "RW": null,
+      "LD": null,
+      "RD": null,
+      "G": null
+    },
+    "2": {
+      "LW": null,
+      "C": null,
+      "RW": null,
+      "LD": null,
+      "RD": null
+    },
+    "3": {
+      "LW": null,
+      "C": null,
+      "RW": null,
+      "LD": null,
+      "RD": null
+    }
+  },
+  "last_updated": "2025-08-27T20:12:00",
+  "team_name": "Seattle Kraken"
+}
