@@ -346,6 +346,10 @@
             position: relative;
             margin: 0 auto;
             overflow: hidden;
+            min-height: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
         }
 
         .position-slot.drag-over {
@@ -391,7 +395,7 @@
         .player-card {
             background: linear-gradient(135deg, #1e3a8a, #3b82f6);
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 12px 16px;
             margin-bottom: 8px;
             cursor: grab;
             transition: all 0.3s;
@@ -400,6 +404,9 @@
             user-select: none;
             text-align: center;
             position: relative;
+            min-height: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .player-card:hover {
@@ -544,6 +551,54 @@
 
         /* Mobile Optimizations */
         @media (max-width: 768px) {
+            .player-card {
+                padding: 16px 20px;
+                min-height: 50px;
+                font-size: 1rem;
+                margin-bottom: 10px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .position-slot {
+                width: 100px;
+                height: 70px;
+                min-height: 50px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .position-label {
+                font-size: 0.7rem;
+            }
+            
+            button {
+                padding: 12px 16px;
+                font-size: 16px;
+                min-height: 44px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .logo {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .tagline {
+                font-size: 0.9rem;
+            }
+            
+            .positions {
+                gap: 8px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                gap: 10px;
+            }
+            
+            body {
             body {
                 padding: 10px;
                 font-size: 14px;
@@ -1566,6 +1621,8 @@
                 touchStartY = e.touches[0].clientY;
                 isDragging = false;
 
+                console.log('Touch start:', { playerCard: !!playerCard, positionSlot: !!positionSlot, selectedPlayer: !!selectedPlayer });
+
                 // Visual feedback for touch
                 if (playerCard && !playerCard.classList.contains('in-position')) {
                     playerCard.style.transform = 'scale(0.95)';
@@ -1618,17 +1675,35 @@
                     const playerCard = e.target.closest('.player-card');
                     const positionSlot = e.target.closest('.position-slot');
                     
+                    console.log('Touch end - tap detected:', { 
+                        playerCard: !!playerCard, 
+                        positionSlot: !!positionSlot, 
+                        selectedPlayer: !!selectedPlayer,
+                        isDragging: isDragging,
+                        duration: touchEndTime - touchStartTime,
+                        distance: distance
+                    });
+                    
                     if (playerCard && !playerCard.classList.contains('in-position')) {
                         // Select player
+                        console.log('Selecting player');
                         selectPlayer(playerCard);
                         showFeedback('Player selected! Tap a position to place.', 'info');
                     } else if (positionSlot && selectedPlayer) {
                         // Place player
+                        console.log('Placing player in position');
                         placePlayerInPosition(positionSlot);
                     } else if (!playerCard && !positionSlot) {
                         // Deselect
+                        console.log('Deselecting player');
                         deselectPlayer();
                     }
+                } else {
+                    console.log('Touch end - not a tap:', { 
+                        isDragging: isDragging, 
+                        duration: touchEndTime - touchStartTime, 
+                        distance: distance 
+                    });
                 }
 
                 // Reset tracking variables
