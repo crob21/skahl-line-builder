@@ -155,6 +155,7 @@ def remove_from_line(player_id):
 @app.route('/api/lines/clear/<line_num>', methods=['DELETE'])
 def clear_line(line_num):
     if line_num in manager.lines:
+        # Clear the line by setting all positions to None
         if line_num == 1:
             manager.lines[line_num] = {"LW": None, "C": None, "RW": None, 
                                       "LD": None, "RD": None, "G": None}
@@ -1757,13 +1758,33 @@ if __name__ == '__main__':
         }
 
         async function clearLine(lineNum) {
-            const response = await fetch(`/api/lines/clear/${lineNum}`, {
-                method: 'DELETE'
-            });
-            
-            if (response.ok) {
-                loadPlayers();
-                loadLines();
+            try {
+                const response = await fetch(`/api/lines/clear/${lineNum}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    // Clear the visual display immediately
+                    const lineSection = document.querySelector(`[data-line="${lineNum}"]`).closest('.line-section');
+                    lineSection.querySelectorAll('.position-slot').forEach(slot => {
+                        const positionLabel = slot.querySelector('.position-label');
+                        if (positionLabel) {
+                            slot.innerHTML = positionLabel.outerHTML;
+                        }
+                    });
+                    
+                    // Reload data
+                    await loadPlayers();
+                    await loadLines();
+                    
+                    // Show feedback
+                    showFeedback(`Line ${lineNum} cleared`, 'success');
+                } else {
+                    showFeedback('Error clearing line', 'error');
+                }
+            } catch (error) {
+                console.error('Error clearing line:', error);
+                showFeedback('Error clearing line', 'error');
             }
         }
 
@@ -1916,22 +1937,58 @@ if __name__ == '__main__':
         let selectedPlayerElement = null;
 
         function setupClickToSelect() {
-            // Add click handlers to player cards
+            let touchStartTime = 0;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            
+            // Handle both click and touch events
             document.addEventListener('click', function(e) {
-                const playerCard = e.target.closest('.player-card');
-                const positionSlot = e.target.closest('.position-slot');
-                
-                if (playerCard && !playerCard.classList.contains('in-position')) {
-                    // Player card clicked - select it
-                    selectPlayer(playerCard);
-                } else if (positionSlot && selectedPlayer) {
-                    // Position slot clicked with player selected - place player
-                    placePlayerInPosition(positionSlot);
-                } else if (!playerCard && !positionSlot) {
-                    // Clicked outside - deselect
-                    deselectPlayer();
+                // Only handle clicks that aren't from touch events
+                if (Date.now() - touchStartTime > 300) {
+                    handleClickOrTap(e);
                 }
             });
+            
+            // Handle touch events for mobile
+            document.addEventListener('touchstart', function(e) {
+                touchStartTime = Date.now();
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            document.addEventListener('touchend', function(e) {
+                const touchEndTime = Date.now();
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                
+                // Calculate distance moved
+                const distance = Math.sqrt(
+                    Math.pow(touchEndX - touchStartX, 2) + 
+                    Math.pow(touchEndY - touchStartY, 2)
+                );
+                
+                // If it's a tap (short duration, small distance), handle as click
+                if (touchEndTime - touchStartTime < 300 && distance < 10) {
+                    e.preventDefault();
+                    handleClickOrTap(e);
+                }
+            }, { passive: false });
+        }
+        
+        function handleClickOrTap(e) {
+            const playerCard = e.target.closest('.player-card');
+            const positionSlot = e.target.closest('.position-slot');
+            
+            if (playerCard && !playerCard.classList.contains('in-position')) {
+                // Player card clicked/tapped - select it
+                selectPlayer(playerCard);
+            } else if (positionSlot && selectedPlayer) {
+                // Position slot clicked/tapped with player selected - place player
+                placePlayerInPosition(positionSlot);
+            } else if (!playerCard && !positionSlot) {
+                // Clicked/tapped outside - deselect
+                deselectPlayer();
+            }
         }
 
         function selectPlayer(playerCard) {
@@ -2120,42 +2177,34 @@ if __name__ == '__main__':
                 });
             });
 
-            // Improve drag and drop for touch devices
-            let touchStartX, touchStartY, touchStartTime;
-            let isDragging = false;
-
+            // Add touch feedback for player cards
             document.addEventListener('touchstart', function(e) {
-                if (e.target.closest('.player-card')) {
-                    touchStartX = e.touches[0].clientX;
-                    touchStartY = e.touches[0].clientY;
-                    touchStartTime = Date.now();
+                const playerCard = e.target.closest('.player-card');
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    playerCard.style.transform = 'scale(0.98)';
                 }
             }, { passive: true });
 
-            document.addEventListener('touchmove', function(e) {
-                if (touchStartX !== undefined) {
-                    const touchEndX = e.touches[0].clientX;
-                    const touchEndY = e.touches[0].clientY;
-                    const distance = Math.sqrt(
-                        Math.pow(touchEndX - touchStartX, 2) + 
-                        Math.pow(touchEndY - touchStartY, 2)
-                    );
-                    
-                    if (distance > 10) { // Minimum drag distance
-                        isDragging = true;
-                        e.preventDefault();
-                    }
+            document.addEventListener('touchend', function(e) {
+                const playerCard = e.target.closest('.player-card');
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    playerCard.style.transform = '';
                 }
-            }, { passive: false });
+            }, { passive: true });
+
+            // Add touch feedback for position slots
+            document.addEventListener('touchstart', function(e) {
+                const positionSlot = e.target.closest('.position-slot');
+                if (positionSlot && selectedPlayer) {
+                    positionSlot.style.transform = 'scale(0.95)';
+                }
+            }, { passive: true });
 
             document.addEventListener('touchend', function(e) {
-                if (isDragging) {
-                    isDragging = false;
-                    // Handle touch-based drag and drop here if needed
+                const positionSlot = e.target.closest('.position-slot');
+                if (positionSlot) {
+                    positionSlot.style.transform = '';
                 }
-                touchStartX = undefined;
-                touchStartY = undefined;
-                touchStartTime = undefined;
             }, { passive: true });
         }
 
