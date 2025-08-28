@@ -134,6 +134,7 @@ data/teams/*.json
 !data/teams/jackalopes.json
 # Ignore current session file
 data/teams/current_session.json
+data/sessions/
 
 # IDE files
 .vscode/

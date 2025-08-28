@@ -1,14 +1,24 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session
 import json
 import os
 import csv
 import io
 from datetime import datetime
+import secrets
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)  # Generate a random secret key
+
+def get_session_data_file():
+    """Get the data file path for the current session"""
+    if 'session_id' not in session:
+        session['session_id'] = secrets.token_hex(8)  # Generate unique session ID
+    return f"data/sessions/{session['session_id']}.json"
 
 class HockeyTeamManager:
-    def __init__(self, data_file="data/teams/current_session.json"):
+    def __init__(self, data_file=None):
+        if data_file is None:
+            data_file = get_session_data_file()
         self.data_file = data_file
         self.players = []
         self.lines = {
@@ -109,8 +119,9 @@ class HockeyTeamManager:
         self.save_data()
         return {"success": True}
 
-# Create the manager instance
-manager = HockeyTeamManager()
+def get_manager():
+    """Get the team manager for the current session"""
+    return HockeyTeamManager()
 
 @app.route('/')
 def index():
@@ -118,10 +129,12 @@ def index():
 
 @app.route('/api/players', methods=['GET'])
 def get_players():
+    manager = get_manager()
     return jsonify(manager.players)
 
 @app.route('/api/players', methods=['POST'])
 def add_player():
+    manager = get_manager()
     data = request.json
     jersey_number = data.get('jersey_number', '')
     affiliate = data.get('affiliate', False)
@@ -130,15 +143,18 @@ def add_player():
 
 @app.route('/api/players/<int:player_id>', methods=['DELETE'])
 def remove_player(player_id):
+    manager = get_manager()
     result = manager.remove_player(player_id)
     return jsonify(result)
 
 @app.route('/api/lines', methods=['GET'])
 def get_lines():
+    manager = get_manager()
     return jsonify(manager.lines)
 
 @app.route('/api/lines/set-player', methods=['POST'])
 def set_player_in_line():
+    manager = get_manager()
     data = request.json
     result = manager.set_player_in_line(
         data['player_id'], 
@@ -149,11 +165,13 @@ def set_player_in_line():
 
 @app.route('/api/lines/remove-player/<int:player_id>', methods=['DELETE'])
 def remove_from_line(player_id):
+    manager = get_manager()
     result = manager.remove_from_line(player_id)
     return jsonify(result)
 
 @app.route('/api/lines/clear/<line_num>', methods=['DELETE'])
 def clear_line(line_num):
+    manager = get_manager()
     if line_num in manager.lines:
         # Clear the line by setting all positions to None
         if line_num == 1:
@@ -168,6 +186,7 @@ def clear_line(line_num):
 
 @app.route('/api/teams/upload', methods=['POST'])
 def upload_team():
+    manager = get_manager()
     if 'file' not in request.files:
         return jsonify({"success": False, "message": "No file uploaded"})
     
@@ -226,6 +245,7 @@ def upload_team():
 
 @app.route('/api/teams/download', methods=['GET'])
 def download_team():
+    manager = get_manager()
     try:
         # Create CSV content
         output = io.StringIO()
@@ -256,6 +276,7 @@ def download_team():
 
 @app.route('/api/teams/save', methods=['POST'])
 def save_team():
+    manager = get_manager()
     data = request.json
     team_name = data.get('team_name', 'hockey_team').strip()
     
@@ -283,6 +304,7 @@ def save_team():
 
 @app.route('/api/teams/load', methods=['POST'])
 def load_team():
+    manager = get_manager()
     data = request.json
     filename = data.get('filename', 'hockey_team.json')
     
@@ -336,6 +358,7 @@ def list_teams():
 
 @app.route('/api/print-lines', methods=['GET'])
 def print_lines():
+    manager = get_manager()
     try:
         # Get current date
         current_date = datetime.now().strftime("%B %d, %Y")
