@@ -600,7 +600,9 @@ def view_shared_lines(line_id):
             <div class="container">
                 <div class="header">
                     <h1>
-                        <div class="logo">🦭<br>LINE<br>WALRUS</div>
+                        <div class="logo">
+                            <img src="/static/images/line-walrus-logo.svg" alt="LINE WALRUS Logo">
+                        </div>
                         LINE WALRUS
                     </h1>
                     <h2>{line_data['name']}</h2>
@@ -715,6 +717,7 @@ def print_lines():
         <html>
         <head>
             <title>LINE WALRUS - Lines</title>
+            <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
             <style>
                 body {{ 
                     font-family: Arial, sans-serif; 
@@ -812,7 +815,9 @@ def print_lines():
         <body>
             <div class="header">
                 <h1>
-                    <div class="logo">🦭<br>LINE<br>WALRUS</div>
+                    <div class="logo">
+                        <img src="/static/images/line-walrus-logo.svg" alt="LINE WALRUS Logo">
+                    </div>
                     LINE WALRUS
                 </h1>
                 <h2>Game Lines - {current_date}</h2>
@@ -910,7 +915,8 @@ if __name__ == '__main__':
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                    <title>LINE WALRUS</title>
+    <title>LINE WALRUS</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
@@ -949,17 +955,16 @@ if __name__ == '__main__':
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-            padding: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-            text-align: center;
-            line-height: 1.2;
+        }
+        
+        .logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
         }
 
         .controls {
@@ -1685,7 +1690,9 @@ if __name__ == '__main__':
 <body>
     <div class="container">
         <h1>
-            <div class="logo">🦭<br>LINE<br>WALRUS</div>
+            <div class="logo">
+                <img src="/static/images/line-walrus-logo.svg" alt="LINE WALRUS Logo">
+            </div>
             LINE WALRUS
         </h1>
         
