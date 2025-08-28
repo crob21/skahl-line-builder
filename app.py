@@ -123,6 +123,11 @@ def get_manager():
     """Get the team manager for the current session"""
     return HockeyTeamManager()
 
+def get_shared_team_manager():
+    """Get a team manager for shared team operations (save/load)"""
+    # Use a temporary file for shared operations
+    return HockeyTeamManager("data/teams/temp_shared.json")
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -186,7 +191,8 @@ def clear_line(line_num):
 
 @app.route('/api/teams/upload', methods=['POST'])
 def upload_team():
-    manager = get_manager()
+    # Get current session manager to load CSV into
+    session_manager = get_manager()
     if 'file' not in request.files:
         return jsonify({"success": False, "message": "No file uploaded"})
     
@@ -202,14 +208,14 @@ def upload_team():
         content = file.read().decode('utf-8')
         csv_reader = csv.DictReader(io.StringIO(content))
         
-        # Clear current team
-        manager.players = []
-        manager.lines[1] = {"LW": None, "C": None, "RW": None, 
-                           "LD": None, "RD": None, "G": None}
-        manager.lines[2] = {"LW": None, "C": None, "RW": None, 
-                           "LD": None, "RD": None}
-        manager.lines[3] = {"LW": None, "C": None, "RW": None, 
-                           "LD": None, "RD": None}
+        # Clear current session team
+        session_manager.players = []
+        session_manager.lines[1] = {"LW": None, "C": None, "RW": None, 
+                                   "LD": None, "RD": None, "G": None}
+        session_manager.lines[2] = {"LW": None, "C": None, "RW": None, 
+                                   "LD": None, "RD": None}
+        session_manager.lines[3] = {"LW": None, "C": None, "RW": None, 
+                                   "LD": None, "RD": None}
         
         # Add players from CSV
         for row in csv_reader:
@@ -233,12 +239,12 @@ def upload_team():
                         "jersey_number": jersey_number,
                         "roster_position": position,  # FORWARD, DEFENSE, GOALIE
                         "affiliate": affiliate == "YES",
-                        "id": len(manager.players) + 1
+                        "id": len(session_manager.players) + 1
                     }
-                    manager.players.append(player)
+                    session_manager.players.append(player)
         
-        manager.save_data()
-        return jsonify({"success": True, "message": f"Team uploaded successfully! Added {len(manager.players)} players."})
+        session_manager.save_data()
+        return jsonify({"success": True, "message": f"Team uploaded successfully! Added {len(session_manager.players)} players."})
         
     except Exception as e:
         return jsonify({"success": False, "message": f"Error processing file: {str(e)}"})
@@ -276,17 +282,18 @@ def download_team():
 
 @app.route('/api/teams/save', methods=['POST'])
 def save_team():
-    manager = get_manager()
+    # Get current session data
+    session_manager = get_manager()
     data = request.json
     team_name = data.get('team_name', 'hockey_team').strip()
     
     if not team_name:
         team_name = 'hockey_team'
     
-    # Create a copy of current data
+    # Create a copy of current session data to save as shared team
     team_data = {
-        "players": manager.players,
-        "lines": manager.lines,
+        "players": session_manager.players,
+        "lines": session_manager.lines,
         "last_updated": datetime.now().isoformat(),
         "team_name": team_name
     }
@@ -304,7 +311,8 @@ def save_team():
 
 @app.route('/api/teams/load', methods=['POST'])
 def load_team():
-    manager = get_manager()
+    # Get current session manager to load data into
+    session_manager = get_manager()
     data = request.json
     filename = data.get('filename', 'hockey_team.json')
     
@@ -317,9 +325,10 @@ def load_team():
         with open(filepath, 'r') as f:
             team_data = json.load(f)
         
-        manager.players = team_data.get("players", [])
-        manager.lines = team_data.get("lines", manager.lines)
-        manager.save_data()
+        # Load shared team data into current session
+        session_manager.players = team_data.get("players", [])
+        session_manager.lines = team_data.get("lines", session_manager.lines)
+        session_manager.save_data()
         
         return jsonify({"success": True, "message": f"Team loaded successfully!"})
     except Exception as e:
