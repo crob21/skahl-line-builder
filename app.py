@@ -271,7 +271,7 @@ def save_team():
     
     # Save to a new file
     filename = f"{team_name.replace(' ', '_').lower()}.json"
-    filepath = os.path.join(os.getcwd(), filename)
+    filepath = os.path.join(os.getcwd(), 'data', 'teams', filename)
     
     try:
         with open(filepath, 'w') as f:
@@ -283,9 +283,9 @@ def save_team():
 @app.route('/api/teams/load', methods=['POST'])
 def load_team():
     data = request.json
-    filename = data.get('filename', 'data/teams/hockey_team.json')
+    filename = data.get('filename', 'hockey_team.json')
     
-    filepath = os.path.join(os.getcwd(), filename)
+    filepath = os.path.join(os.getcwd(), 'data', 'teams', filename)
     
     if not os.path.exists(filepath):
         return jsonify({"success": False, "message": "Team file not found"})
