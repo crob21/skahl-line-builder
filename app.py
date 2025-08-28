@@ -952,6 +952,93 @@ def print_lines():
         
         html_content += '''
         </body>
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>
+                    <div class="logo">
+                        <img src="/static/images/line-walrus-logo.png" alt="Line Walrus Logo">
+                    </div>
+                    Line Walrus
+                </h1>
+                <p class="tagline">Because Even a Walrus Can Manage Lines Better</p>
+                <h2>Game Lines - {current_date}</h2>
+            </div>
+        '''
+        
+        # Add each line (only if it has players)
+        for line_num in ["1", "2", "3"]:
+            line = manager.lines[line_num]
+            
+            # Check if line has any players
+            has_players = any(player for player in line.values())
+            if not has_players:
+                continue
+                
+            html_content += f'''
+            <div class="line-section">
+                <div class="line-title">Line {line_num}</div>
+            '''
+            
+            # Add forwards row (only if there are forwards)
+            forwards = []
+            if line['LW']: forwards.append(('LW', line['LW']['name']))
+            if line['C']: forwards.append(('C', line['C']['name']))
+            if line['RW']: forwards.append(('RW', line['RW']['name']))
+            
+            if forwards:
+                html_content += '<div class="positions">'
+                for pos, name in forwards:
+                    html_content += f'''
+                    <div class="position">
+                        <div class="position-label">{pos}</div>
+                        <div class="player-name">{name}</div>
+                    </div>
+                    '''
+                html_content += '</div>'
+            
+            # Add defense row (only if there are defensemen)
+            defense = []
+            if line['LD']: defense.append(('LD', line['LD']['name']))
+            if line['RD']: defense.append(('RD', line['RD']['name']))
+            
+            if defense:
+                html_content += '<div class="positions">'
+                for pos, name in defense:
+                    html_content += f'''
+                    <div class="position">
+                        <div class="position-label">{pos}</div>
+                        <div class="player-name">{name}</div>
+                    </div>
+                    '''
+                html_content += '</div>'
+            
+            html_content += '</div>'
+        
+        # Add single goalie section (only if there's a goalie)
+        goalie_player = None
+        # Only check Line 1 for goalie since that's the only line with G position
+        if 'G' in manager.lines["1"] and manager.lines["1"]['G']:
+            goalie_player = manager.lines["1"]['G']
+        
+        if goalie_player:
+            html_content += f'''
+            <div class="line-section">
+                <div class="line-title">Goalie</div>
+                <div class="positions">
+                    <div class="position goalie-position">
+                        <div class="position-label">G</div>
+                        <div class="player-name">{goalie_player['name']}</div>
+                    </div>
+                </div>
+            </div>
+            '''
+        
+
+        
+        html_content += '''
+        </body>
         </html>
         '''
         
@@ -1314,6 +1401,10 @@ if __name__ == '__main__':
             position: relative;
             margin: 0 auto;
             overflow: hidden;
+            min-height: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
         }
 
         .position-slot.drag-over {
@@ -1359,7 +1450,7 @@ if __name__ == '__main__':
         .player-card {
             background: linear-gradient(135deg, #1e3a8a, #3b82f6);
             border-radius: 8px;
-            padding: 8px 12px;
+            padding: 12px 16px;
             margin-bottom: 8px;
             cursor: grab;
             transition: all 0.3s;
@@ -1368,6 +1459,9 @@ if __name__ == '__main__':
             user-select: none;
             text-align: center;
             position: relative;
+            min-height: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .player-card:hover {
@@ -1512,6 +1606,54 @@ if __name__ == '__main__':
 
         /* Mobile Optimizations */
         @media (max-width: 768px) {
+            .player-card {
+                padding: 16px 20px;
+                min-height: 50px;
+                font-size: 1rem;
+                margin-bottom: 10px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .position-slot {
+                width: 100px;
+                height: 70px;
+                min-height: 50px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .position-label {
+                font-size: 0.7rem;
+            }
+            
+            button {
+                padding: 12px 16px;
+                font-size: 16px;
+                min-height: 44px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .logo {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .tagline {
+                font-size: 0.9rem;
+            }
+            
+            .positions {
+                gap: 8px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                gap: 10px;
+            }
+            
+            body {
             body {
                 padding: 10px;
                 font-size: 14px;
@@ -2534,6 +2676,8 @@ if __name__ == '__main__':
                 touchStartY = e.touches[0].clientY;
                 isDragging = false;
 
+                console.log('Touch start:', { playerCard: !!playerCard, positionSlot: !!positionSlot, selectedPlayer: !!selectedPlayer });
+
                 // Visual feedback for touch
                 if (playerCard && !playerCard.classList.contains('in-position')) {
                     playerCard.style.transform = 'scale(0.95)';
@@ -2586,17 +2730,35 @@ if __name__ == '__main__':
                     const playerCard = e.target.closest('.player-card');
                     const positionSlot = e.target.closest('.position-slot');
                     
+                    console.log('Touch end - tap detected:', { 
+                        playerCard: !!playerCard, 
+                        positionSlot: !!positionSlot, 
+                        selectedPlayer: !!selectedPlayer,
+                        isDragging: isDragging,
+                        duration: touchEndTime - touchStartTime,
+                        distance: distance
+                    });
+                    
                     if (playerCard && !playerCard.classList.contains('in-position')) {
                         // Select player
+                        console.log('Selecting player');
                         selectPlayer(playerCard);
                         showFeedback('Player selected! Tap a position to place.', 'info');
                     } else if (positionSlot && selectedPlayer) {
                         // Place player
+                        console.log('Placing player in position');
                         placePlayerInPosition(positionSlot);
                     } else if (!playerCard && !positionSlot) {
                         // Deselect
+                        console.log('Deselecting player');
                         deselectPlayer();
                     }
+                } else {
+                    console.log('Touch end - not a tap:', { 
+                        isDragging: isDragging, 
+                        duration: touchEndTime - touchStartTime, 
+                        distance: distance 
+                    });
                 }
 
                 // Reset tracking variables
