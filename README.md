@@ -2,6 +2,8 @@
 
 A professional hockey line management web application for coaches and team managers. Build, organize, and print hockey lines with drag-and-drop functionality.
 
+**Repository**: [crob21/skahl-line-builder](https://github.com/crob21/skahl-line-builder)
+
 ## ✨ Features
 
 - **Drag & Drop Interface**: Intuitive player positioning
@@ -23,7 +25,7 @@ A professional hockey line management web application for coaches and team manag
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/crob21/skahl-line-builder.git
    cd skahl-line-builder
    ```
 
