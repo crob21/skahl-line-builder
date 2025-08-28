@@ -544,12 +544,65 @@ def view_shared_lines(line_id):
                     background: #f59e0b;
                     transform: translateY(-2px);
                 }}
+                .print-button {{
+                    background: #dc3545;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    margin-top: 10px;
+                    margin-left: 10px;
+                    text-decoration: none;
+                    display: inline-block;
+                }}
+                .print-button:hover {{
+                    background: #c82333;
+                    transform: translateY(-2px);
+                }}
+                @media print {{
+                    .load-button, .print-button {{
+                        display: none;
+                    }}
+                    body {{
+                        background: white !important;
+                        color: black !important;
+                    }}
+                    .container {{
+                        background: white !important;
+                        box-shadow: none !important;
+                    }}
+                    .line-section {{
+                        background: #f8f9fa !important;
+                        border: 1px solid #dee2e6 !important;
+                        color: black !important;
+                    }}
+                    .position {{
+                        background: white !important;
+                        border: 1px solid #dee2e6 !important;
+                        color: black !important;
+                    }}
+                    .position-label {{
+                        color: #495057 !important;
+                    }}
+                    .player-name {{
+                        color: black !important;
+                    }}
+                    .header h1, .header h2 {{
+                        color: #495057 !important;
+                    }}
+                }}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>SKAHL Line Builder</h1>
+                    <h1>
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHN0eWxlPgogIC5zaGllbGQgeyBmaWxsOiAjOEI1N0YzOyB9CiAgLndhbHJ1cyB7IGZpbGw6ICM4QjU3RjM7IH0KICAuaGVsbWV0IHsgZmlsbDogIzFBM0E4QTsgfQogIC5zdGljayB7IGZpbGw6ICMxQTNBOEE7IH0KICAudGV4dCB7IGZpbGw6IHdoaXRlOyBmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7IGZvbnQtd2VpZ2h0OiBib2xkOyB9CiAgLmJhbm5lciB7IGZpbGw6ICMxQTNBOEE7IH0KPC9zdHlsZT4KPHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZyBjbGFzcz0ic2hpZWxkIj4KICAgIDxwYXRoIGQ9Ik0zMCA1QzQwIDUgNDggMTMgNDggMjNWMzVDNDggNDUgNDAgNTMgMzAgNTNDMjAgNTMgMTIgNDUgMTIgMzVWMjNDMTIgMTMgMjAgNSAzMCA1WiIgZmlsbD0iI0Q3QzM5QyIvPgogICAgPHBhdGggZD0iTTMwIDVDNDAgNSA0OCAxMyA0OCAyM1YzNUM0OCA0NSA0MCA1MyAzMCA1M0MyMCA1MyAxMiA0NSAxMiAzNVYyM0MxMiAxMyAyMCA1IDMwIDVaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMiIvPgogIDwvZz4KICA8ZyBjbGFzcz0id2FscnVzIj4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIGZpbGw9IiM4QjU3RjMiLz4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIHN0cm9rZT0iIzFBM0E4QSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8Y2lyY2xlIGN4PSIyMiIgY3k9IjI3IiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgogICAgPGNpcmNsZSBjeD0iMjgiIGN5PSIyNyIgcj0iMSIgZmlsbD0id2hpdGUiLz4KICAgIDxwYXRoIGQ9Ik0xOCAzMkwyMiAzNkwyOCAzNkwzMiAzMiIgc3Ryb2tlPSIjMUEzQThBIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz4KICA8L2c+CiAgPGcgY2xhc3M9ImhlbG1ldCI+CiAgICA8cGF0aCBkPSJNMTggMjJMMjIgMjBMMzAgMjBMMzQgMjJMMzQgMjVMMzAgMjNMMjIgMjNMMTggMjVaIiBmaWxsPSIjMUEzQThBIi8+CiAgPC9nPgogIDxnIGNsYXNzPSJzdGljayI+CiAgICA8cGF0aCBkPSJNMzAgMzJMMzUgMjhMMzggMjlMMzUgMzRMMzAgMzJaIiBmaWxsPSIjMUEzQThBIi8+CiAgICA8cGF0aCBkPSJNMzUgMjhMMzggMjlMMzUgMzRaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDwvZz4KICA8ZyBjbGFzcz0iYmFubmVyIj4KICAgIDxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjEwIiByeD0iMiIgZmlsbD0iIzFBM0E4QSIvPgogICAgPHRleHQgeD0iMzAiIHk9IjQ3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5MSU5FPC90ZXh0PgogICAgPHRleHQgeD0iMzAiIHk9IjU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5XQUxSVVM8L3RleHQ+CiAgPC9nPgo8L3N2Zz4K" alt="LINE WALRUS Logo" class="logo">
+                        LINE WALRUS
+                    </h1>
                     <h2>{line_data['name']}</h2>
                     <p>Shared on {datetime.fromisoformat(line_data['created']).strftime('%B %d, %Y at %I:%M %p')}</p>
                 </div>
@@ -611,7 +664,8 @@ def view_shared_lines(line_id):
         html_content += f'''
                 <div class="footer">
                     <p>Want to use these lines in your own session?</p>
-                    <a href="{request.host_url}" class="load-button">Open SKAHL Line Builder</a>
+                    <a href="{request.host_url}" class="load-button">Open LINE WALRUS</a>
+                    <button onclick="window.print()" class="print-button">🖨️ Print Lines</button>
                 </div>
             </div>
         </body>
@@ -660,7 +714,7 @@ def print_lines():
         <!DOCTYPE html>
         <html>
         <head>
-            <title>SKAHL Line Builder - Lines</title>
+            <title>LINE WALRUS - Lines</title>
             <style>
                 body {{ 
                     font-family: Arial, sans-serif; 
@@ -757,7 +811,10 @@ def print_lines():
         </head>
         <body>
             <div class="header">
-                <h1>🏒 SKAHL Line Builder</h1>
+                <h1>
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHN0eWxlPgogIC5zaGllbGQgeyBmaWxsOiAjOEI1N0YzOyB9CiAgLndhbHJ1cyB7IGZpbGw6ICM4QjU3RjM7IH0KICAuaGVsbWV0IHsgZmlsbDogIzFBM0E4QTsgfQogIC5zdGljayB7IGZpbGw6ICMxQTNBOEE7IH0KICAudGV4dCB7IGZpbGw6IHdoaXRlOyBmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7IGZvbnQtd2VpZ2h0OiBib2xkOyB9CiAgLmJhbm5lciB7IGZpbGw6ICMxQTNBOEE7IH0KPC9zdHlsZT4KPHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZyBjbGFzcz0ic2hpZWxkIj4KICAgIDxwYXRoIGQ9Ik0zMCA1QzQwIDUgNDggMTMgNDggMjNWMzVDNDggNDUgNDAgNTMgMzAgNTNDMjAgNTMgMTIgNDUgMTIgMzVWMjNDMTIgMTMgMjAgNSAzMCA1WiIgZmlsbD0iI0Q3QzM5QyIvPgogICAgPHBhdGggZD0iTTMwIDVDNDAgNSA0OCAxMyA0OCAyM1YzNUM0OCA0NSA0MCA1MyAzMCA1M0MyMCA1MyAxMiA0NSAxMiAzNVYyM0MxMiAxMyAyMCA1IDMwIDVaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMiIvPgogIDwvZz4KICA8ZyBjbGFzcz0id2FscnVzIj4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIGZpbGw9IiM4QjU3RjMiLz4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIHN0cm9rZT0iIzFBM0E4QSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8Y2lyY2xlIGN4PSIyMiIgY3k9IjI3IiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgogICAgPGNpcmNsZSBjeD0iMjgiIGN5PSIyNyIgcj0iMSIgZmlsbD0id2hpdGUiLz4KICAgIDxwYXRoIGQ9Ik0xOCAzMkwyMiAzNkwyOCAzNkwzMiAzMiIgc3Ryb2tlPSIjMUEzQThBIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz4KICA8L2c+CiAgPGcgY2xhc3M9ImhlbG1ldCI+CiAgICA8cGF0aCBkPSJNMTggMjJMMjIgMjBMMzAgMjBMMzQgMjJMMzQgMjVMMzAgMjNMMjIgMjNMMTggMjVaIiBmaWxsPSIjMUEzQThBIi8+CiAgPC9nPgogIDxnIGNsYXNzPSJzdGljayI+CiAgICA8cGF0aCBkPSJNMzAgMzJMMzUgMjhMMzggMjlMMzUgMzRMMzAgMzJaIiBmaWxsPSIjMUEzQThBIi8+CiAgICA8cGF0aCBkPSJNMzUgMjhMMzggMjlMMzUgMzRaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDwvZz4KICA8ZyBjbGFzcz0iYmFubmVyIj4KICAgIDxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjEwIiByeD0iMiIgZmlsbD0iIzFBM0E4QSIvPgogICAgPHRleHQgeD0iMzAiIHk9IjQ3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5MSU5FPC90ZXh0PgogICAgPHRleHQgeD0iMzAiIHk9IjU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5XQUxSVVM8L3RleHQ+CiAgPC9nPgo8L3N2Zz4K" alt="LINE WALRUS Logo" class="logo">
+                    LINE WALRUS
+                </h1>
                 <h2>Game Lines - {current_date}</h2>
             </div>
         '''
@@ -853,7 +910,7 @@ if __name__ == '__main__':
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SKAHL Line Builder</title>
+                    <title>LINE WALRUS</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
@@ -882,6 +939,19 @@ if __name__ == '__main__':
             margin-bottom: 30px;
             font-size: 2.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            padding: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .controls {
@@ -947,9 +1017,7 @@ if __name__ == '__main__':
             flex-direction: column;
             justify-content: space-between;
             min-height: 120px;
-        }
-
-        .team-section h4 {
+        }        .team-section h4 {
             margin-bottom: 12px;
             text-align: center;
             color: #fff;
@@ -1608,7 +1676,10 @@ if __name__ == '__main__':
 </head>
 <body>
     <div class="container">
-        <h1>🏒 SKAHL Line Builder</h1>
+        <h1>
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHN0eWxlPgogIC5zaGllbGQgeyBmaWxsOiAjOEI1N0YzOyB9CiAgLndhbHJ1cyB7IGZpbGw6ICM4QjU3RjM7IH0KICAuaGVsbWV0IHsgZmlsbDogIzFBM0E4QTsgfQogIC5zdGljayB7IGZpbGw6ICMxQTNBOEE7IH0KICAudGV4dCB7IGZpbGw6IHdoaXRlOyBmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7IGZvbnQtd2VpZ2h0OiBib2xkOyB9CiAgLmJhbm5lciB7IGZpbGw6ICMxQTNBOEE7IH0KPC9zdHlsZT4KPHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZyBjbGFzcz0ic2hpZWxkIj4KICAgIDxwYXRoIGQ9Ik0zMCA1QzQwIDUgNDggMTMgNDggMjNWMzVDNDggNDUgNDAgNTMgMzAgNTNDMjAgNTMgMTIgNDUgMTIgMzVWMjNDMTIgMTMgMjAgNSAzMCA1WiIgZmlsbD0iI0Q3QzM5QyIvPgogICAgPHBhdGggZD0iTTMwIDVDNDAgNSA0OCAxMyA0OCAyM1YzNUM0OCA0NSA0MCA1MyAzMCA1M0MyMCA1MyAxMiA0NSAxMiAzNVYyM0MxMiAxMyAyMCA1IDMwIDVaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMiIvPgogIDwvZz4KICA8ZyBjbGFzcz0id2FscnVzIj4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIGZpbGw9IiM4QjU3RjMiLz4KICAgIDxwYXRoIGQ9Ik0yMCAyNUMxOCAyNSAxNiAyNyAxNiAyOVMzOCAzMSAyMCAzMUMxOCAzMSAxNiAyOSAxNiAyN1MyMCAyNSAyMCAyNVoiIHN0cm9rZT0iIzFBM0E4QSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8Y2lyY2xlIGN4PSIyMiIgY3k9IjI3IiByPSIxIiBmaWxsPSJ3aGl0ZSIvPgogICAgPGNpcmNsZSBjeD0iMjgiIGN5PSIyNyIgcj0iMSIgZmlsbD0id2hpdGUiLz4KICAgIDxwYXRoIGQ9Ik0xOCAzMkwyMiAzNkwyOCAzNkwzMiAzMiIgc3Ryb2tlPSIjMUEzQThBIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz4KICA8L2c+CiAgPGcgY2xhc3M9ImhlbG1ldCI+CiAgICA8cGF0aCBkPSJNMTggMjJMMjIgMjBMMzAgMjBMMzQgMjJMMzQgMjVMMzAgMjNMMjIgMjNMMTggMjVaIiBmaWxsPSIjMUEzQThBIi8+CiAgPC9nPgogIDxnIGNsYXNzPSJzdGljayI+CiAgICA8cGF0aCBkPSJNMzAgMzJMMzUgMjhMMzggMjlMMzUgMzRMMzAgMzJaIiBmaWxsPSIjMUEzQThBIi8+CiAgICA8cGF0aCBkPSJNMzUgMjhMMzggMjlMMzUgMzRaIiBzdHJva2U9IiMxQTNBOEEiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIvPgogIDwvZz4KICA8ZyBjbGFzcz0iYmFubmVyIj4KICAgIDxyZWN0IHg9IjEwIiB5PSI0MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjEwIiByeD0iMiIgZmlsbD0iIzFBM0E4QSIvPgogICAgPHRleHQgeD0iMzAiIHk9IjQ3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5MSU5FPC90ZXh0PgogICAgPHRleHQgeD0iMzAiIHk9IjU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0idGV4dCIgZm9udC1zaXplPSI4Ij5XQUxSVVM8L3RleHQ+CiAgPC9nPgo8L3N2Zz4K" alt="LINE WALRUS Logo" class="logo">
+            LINE WALRUS
+        </h1>
         
         <div class="controls">
             <div class="team-management">
@@ -2350,30 +2421,65 @@ if __name__ == '__main__':
             });
         }
 
-        // Click-to-select functionality
+        // Mobile-first player placement system
         let selectedPlayer = null;
         let selectedPlayerElement = null;
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        function setupClickToSelect() {
+        function setupMobilePlayerPlacement() {
+            if (isMobile) {
+                // Mobile: Use touch events only
+                setupMobileTouchPlacement();
+            } else {
+                // Desktop: Use click events
+                setupDesktopClickPlacement();
+            }
+        }
+
+        function setupMobileTouchPlacement() {
             let touchStartTime = 0;
             let touchStartX = 0;
             let touchStartY = 0;
-            
-            // Handle both click and touch events
-            document.addEventListener('click', function(e) {
-                // Only handle clicks that aren't from touch events
-                if (Date.now() - touchStartTime > 300) {
-                    handleClickOrTap(e);
-                }
-            });
-            
-            // Handle touch events for mobile
+            let isDragging = false;
+
+            // Touch start - detect what was touched
             document.addEventListener('touchstart', function(e) {
+                const playerCard = e.target.closest('.player-card');
+                const positionSlot = e.target.closest('.position-slot');
+                
                 touchStartTime = Date.now();
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
+                isDragging = false;
+
+                // Visual feedback for touch
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    playerCard.style.transform = 'scale(0.95)';
+                    playerCard.style.opacity = '0.8';
+                }
+                if (positionSlot && selectedPlayer) {
+                    positionSlot.style.transform = 'scale(0.95)';
+                    positionSlot.style.opacity = '0.8';
+                }
             }, { passive: true });
-            
+
+            // Touch move - detect if user is dragging
+            document.addEventListener('touchmove', function(e) {
+                if (touchStartX !== undefined) {
+                    const touchEndX = e.touches[0].clientX;
+                    const touchEndY = e.touches[0].clientY;
+                    const distance = Math.sqrt(
+                        Math.pow(touchEndX - touchStartX, 2) + 
+                        Math.pow(touchEndY - touchStartY, 2)
+                    );
+                    
+                    if (distance > 5) { // Small threshold for mobile
+                        isDragging = true;
+                    }
+                }
+            }, { passive: true });
+
+            // Touch end - handle the action
             document.addEventListener('touchend', function(e) {
                 const touchEndTime = Date.now();
                 const touchEndX = e.changedTouches[0].clientX;
@@ -2385,28 +2491,53 @@ if __name__ == '__main__':
                     Math.pow(touchEndY - touchStartY, 2)
                 );
                 
-                // If it's a tap (short duration, small distance), handle as click
-                if (touchEndTime - touchStartTime < 300 && distance < 10) {
+                // Reset visual feedback
+                document.querySelectorAll('.player-card, .position-slot').forEach(el => {
+                    el.style.transform = '';
+                    el.style.opacity = '';
+                });
+
+                // Only handle if it's a tap (not a drag)
+                if (!isDragging && touchEndTime - touchStartTime < 500 && distance < 10) {
                     e.preventDefault();
-                    handleClickOrTap(e);
+                    
+                    const playerCard = e.target.closest('.player-card');
+                    const positionSlot = e.target.closest('.position-slot');
+                    
+                    if (playerCard && !playerCard.classList.contains('in-position')) {
+                        // Select player
+                        selectPlayer(playerCard);
+                        showFeedback('Player selected! Tap a position to place.', 'info');
+                    } else if (positionSlot && selectedPlayer) {
+                        // Place player
+                        placePlayerInPosition(positionSlot);
+                    } else if (!playerCard && !positionSlot) {
+                        // Deselect
+                        deselectPlayer();
+                    }
                 }
+
+                // Reset tracking variables
+                touchStartX = undefined;
+                touchStartY = undefined;
+                touchStartTime = 0;
+                isDragging = false;
             }, { passive: false });
         }
-        
-        function handleClickOrTap(e) {
-            const playerCard = e.target.closest('.player-card');
-            const positionSlot = e.target.closest('.position-slot');
-            
-            if (playerCard && !playerCard.classList.contains('in-position')) {
-                // Player card clicked/tapped - select it
-                selectPlayer(playerCard);
-            } else if (positionSlot && selectedPlayer) {
-                // Position slot clicked/tapped with player selected - place player
-                placePlayerInPosition(positionSlot);
-            } else if (!playerCard && !positionSlot) {
-                // Clicked/tapped outside - deselect
-                deselectPlayer();
-            }
+
+        function setupDesktopClickPlacement() {
+            document.addEventListener('click', function(e) {
+                const playerCard = e.target.closest('.player-card');
+                const positionSlot = e.target.closest('.position-slot');
+                
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    selectPlayer(playerCard);
+                } else if (positionSlot && selectedPlayer) {
+                    placePlayerInPosition(positionSlot);
+                } else if (!playerCard && !positionSlot) {
+                    deselectPlayer();
+                }
+            });
         }
 
         function selectPlayer(playerCard) {
@@ -2626,11 +2757,11 @@ if __name__ == '__main__':
             }, { passive: true });
         }
 
-        // Initialize all functionality when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            setupMobileTouch();
-            setupClickToSelect();
-        });
+                    // Initialize all functionality when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                setupMobileTouch();
+                setupMobilePlayerPlacement();
+            });
     </script>
 </body>
 </html>'''
