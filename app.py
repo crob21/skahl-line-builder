@@ -601,7 +601,7 @@ def view_shared_lines(line_id):
                 <div class="header">
                     <h1>
                         <div class="logo">
-                            <img src="/static/images/line-walrus-logo.svg" alt="LINE WALRUS Logo">
+                            <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
                         </div>
                         LINE WALRUS
                     </h1>
@@ -717,7 +717,7 @@ def print_lines():
         <html>
         <head>
             <title>LINE WALRUS - Lines</title>
-            <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+            <link rel="icon" type="image/png" href="/static/images/favicon.png">
             <style>
                 body {{ 
                     font-family: Arial, sans-serif; 
@@ -816,7 +816,7 @@ def print_lines():
             <div class="header">
                 <h1>
                     <div class="logo">
-                        <img src="/static/images/line-walrus-logo.svg" alt="LINE WALRUS Logo">
+                        <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
                     </div>
                     LINE WALRUS
                 </h1>
@@ -916,7 +916,7 @@ if __name__ == '__main__':
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LINE WALRUS</title>
-    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
@@ -1691,7 +1691,7 @@ if __name__ == '__main__':
     <div class="container">
         <h1>
             <div class="logo">
-                <img src="/static/images/line-walrus-logo.svg" alt="LINE WALRUS Logo">
+                <img src="/static/images/line-walrus-logo.png" alt="LINE WALRUS Logo">
             </div>
             LINE WALRUS
         </h1>
