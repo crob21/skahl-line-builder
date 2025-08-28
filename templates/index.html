@@ -1593,13 +1593,24 @@
         // Mobile-first player placement system
         let selectedPlayer = null;
         let selectedPlayerElement = null;
-        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                      ('ontouchstart' in window) || 
+                      (navigator.maxTouchPoints > 0);
+
+        console.log('Mobile detection:', { 
+            userAgent: navigator.userAgent,
+            isMobile: isMobile,
+            touchSupport: 'ontouchstart' in window,
+            maxTouchPoints: navigator.maxTouchPoints
+        });
 
         function setupMobilePlayerPlacement() {
             if (isMobile) {
+                console.log('Setting up mobile touch placement');
                 // Mobile: Use touch events only
                 setupMobileTouchPlacement();
             } else {
+                console.log('Setting up desktop click placement');
                 // Desktop: Use click events
                 setupDesktopClickPlacement();
             }
@@ -1610,9 +1621,12 @@
             let touchStartX = 0;
             let touchStartY = 0;
             let isDragging = false;
+            let touchTarget = null;
 
             // Touch start - detect what was touched
             document.addEventListener('touchstart', function(e) {
+                e.preventDefault(); // Prevent default to avoid conflicts
+                
                 const playerCard = e.target.closest('.player-card');
                 const positionSlot = e.target.closest('.position-slot');
                 
@@ -1620,8 +1634,15 @@
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
                 isDragging = false;
+                touchTarget = playerCard || positionSlot;
 
-                console.log('Touch start:', { playerCard: !!playerCard, positionSlot: !!positionSlot, selectedPlayer: !!selectedPlayer });
+                console.log('Touch start:', { 
+                    playerCard: !!playerCard, 
+                    positionSlot: !!positionSlot, 
+                    selectedPlayer: !!selectedPlayer,
+                    target: e.target.tagName,
+                    className: e.target.className
+                });
 
                 // Visual feedback for touch
                 if (playerCard && !playerCard.classList.contains('in-position')) {
@@ -1632,7 +1653,7 @@
                     positionSlot.style.transform = 'scale(0.95)';
                     positionSlot.style.opacity = '0.8';
                 }
-            }, { passive: true });
+            }, { passive: false });
 
             // Touch move - detect if user is dragging
             document.addEventListener('touchmove', function(e) {
@@ -1652,6 +1673,8 @@
 
             // Touch end - handle the action
             document.addEventListener('touchend', function(e) {
+                e.preventDefault(); // Prevent default to avoid conflicts
+                
                 const touchEndTime = Date.now();
                 const touchEndX = e.changedTouches[0].clientX;
                 const touchEndY = e.changedTouches[0].clientY;
@@ -1670,10 +1693,8 @@
 
                 // Only handle if it's a tap (not a drag)
                 if (!isDragging && touchEndTime - touchStartTime < 500 && distance < 10) {
-                    e.preventDefault();
-                    
-                    const playerCard = e.target.closest('.player-card');
-                    const positionSlot = e.target.closest('.position-slot');
+                    const playerCard = touchTarget && touchTarget.classList.contains('player-card') ? touchTarget : e.target.closest('.player-card');
+                    const positionSlot = touchTarget && touchTarget.classList.contains('position-slot') ? touchTarget : e.target.closest('.position-slot');
                     
                     console.log('Touch end - tap detected:', { 
                         playerCard: !!playerCard, 
@@ -1681,17 +1702,18 @@
                         selectedPlayer: !!selectedPlayer,
                         isDragging: isDragging,
                         duration: touchEndTime - touchStartTime,
-                        distance: distance
+                        distance: distance,
+                        touchTarget: touchTarget ? touchTarget.className : 'none'
                     });
                     
                     if (playerCard && !playerCard.classList.contains('in-position')) {
                         // Select player
-                        console.log('Selecting player');
+                        console.log('Selecting player:', playerCard.querySelector('.player-name')?.textContent);
                         selectPlayer(playerCard);
                         showFeedback('Player selected! Tap a position to place.', 'info');
                     } else if (positionSlot && selectedPlayer) {
                         // Place player
-                        console.log('Placing player in position');
+                        console.log('Placing player in position:', positionSlot.dataset.position, positionSlot.dataset.line);
                         placePlayerInPosition(positionSlot);
                     } else if (!playerCard && !positionSlot) {
                         // Deselect
@@ -1711,6 +1733,7 @@
                 touchStartY = undefined;
                 touchStartTime = 0;
                 isDragging = false;
+                touchTarget = null;
             }, { passive: false });
         }
 
