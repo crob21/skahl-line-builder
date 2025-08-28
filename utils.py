@@ -25,7 +25,14 @@ def get_session_data_file(session_id: str) -> str:
 
 def get_team_file(team_name: str) -> str:
     """Get the file path for a team's data"""
-    return os.path.join(TEAMS_DIR, f"{team_name}.json")
+    # Map team names to filenames
+    team_mapping = {
+        "Jackalopes": "jackalopes.json",
+        "Seattle Kraken": "seattle_kraken.json"
+    }
+    
+    filename = team_mapping.get(team_name, f"{team_name.lower().replace(' ', '_')}.json")
+    return os.path.join(TEAMS_DIR, filename)
 
 def get_shared_line_file(line_id: str) -> str:
     """Get the file path for shared line data"""

@@ -42,8 +42,20 @@ class HockeyTeamManager:
             print("📝 No saved data found, loading Kraken roster")
             self.load_kraken_roster()
     
-    def add_player(self, name, position):
-        """Add a new player to the roster"""
+    def add_player(self, player_data):
+        """Add a new player to the roster (new API)"""
+        # Check if player already exists
+        if any(p["name"].lower() == player_data["name"].lower() for p in self.players):
+            print(f"❌ {player_data['name']} is already on the roster!")
+            return False
+        
+        self.players.append(player_data)
+        self.save_data()
+        print(f"✅ Added {player_data['name']} to the roster!")
+        return True
+    
+    def add_player_legacy(self, name, position):
+        """Add a new player to the roster (legacy method)"""
         # Check if player already exists
         if any(p["name"].lower() == name.lower() for p in self.players):
             print(f"❌ {name} is already on the roster!")
@@ -66,8 +78,34 @@ class HockeyTeamManager:
         print(f"✅ Added {name} ({position.upper()}) to the roster!")
         return True
     
-    def remove_player(self, name):
-        """Remove a player from roster and all lines"""
+    def remove_player(self, player_id):
+        """Remove a player from roster and all lines (new API)"""
+        player_found = False
+        
+        # Remove from roster
+        for i, player in enumerate(self.players):
+            if player.get("id") == player_id:
+                self.players.pop(i)
+                player_found = True
+                break
+        
+        if not player_found:
+            print(f"❌ Player with ID {player_id} not found on roster")
+            return False
+        
+        # Remove from all lines
+        for line_num in self.lines:
+            for position in self.lines[line_num]:
+                if (self.lines[line_num][position] and 
+                    self.lines[line_num][position].get("id") == player_id):
+                    self.lines[line_num][position] = None
+        
+        self.save_data()
+        print(f"✅ Removed player {player_id} from roster and all lines!")
+        return True
+    
+    def remove_player_legacy(self, name):
+        """Remove a player from roster and all lines (legacy method)"""
         player_found = False
         
         # Remove from roster
@@ -245,6 +283,75 @@ class HockeyTeamManager:
                 print(f"⚠️  Error loading Kraken roster: {e}")
         else:
             print("⚠️  Kraken roster file not found")
+    
+    # New API methods for web interface
+    def load_players(self, players_list):
+        """Load players from a list (new API)"""
+        self.players = players_list
+        self.save_data()
+        print(f"✅ Loaded {len(players_list)} players")
+    
+    def set_player_in_line(self, player_id, line, position):
+        """Set a player in a specific line position (new API)"""
+        # Find the player
+        player = None
+        for p in self.players:
+            if p.get("id") == player_id:
+                player = p
+                break
+        
+        if not player:
+            print(f"❌ Player with ID '{player_id}' not found on roster")
+            return False
+        
+        # Validate line and position
+        line_num = int(line)
+        if line_num not in [1, 2, 3]:
+            print("❌ Invalid line number. Use 1, 2, or 3")
+            return False
+        
+        valid_positions = ["LW", "C", "RW", "LD", "RD", "G"]
+        if position.upper() not in valid_positions:
+            print(f"❌ Invalid position. Use: {', '.join(valid_positions)}")
+            return False
+        
+        # Check if goalie position is only on line 1
+        if position.upper() == "G" and line_num != 1:
+            print("❌ Goalie position is only available on Line 1")
+            return False
+        
+        # Remove player from any other position first
+        for ln in self.lines:
+            for pos in self.lines[ln]:
+                if (self.lines[ln][pos] and 
+                    isinstance(self.lines[ln][pos], dict) and
+                    self.lines[ln][pos].get("id") == player_id):
+                    self.lines[ln][pos] = None
+        
+        # Set the player in the position
+        self.lines[line_num][position.upper()] = player
+        self.save_data()
+        print(f"✅ Set {player['name']} in Line {line_num} {position.upper()}")
+        return True
+    
+    def remove_from_line(self, line, position):
+        """Remove a player from a line position (new API)"""
+        line_num = int(line)
+        if line_num not in [1, 2, 3]:
+            print("❌ Invalid line number. Use 1, 2, or 3")
+            return False
+        
+        if position.upper() not in ["LW", "C", "RW", "LD", "RD", "G"]:
+            print("❌ Invalid position")
+            return False
+        
+        if self.lines[line_num].get(position.upper()):
+            self.lines[line_num][position.upper()] = None
+            self.save_data()
+            print(f"✅ Removed player from Line {line_num} {position.upper()}")
+            return True
+        
+        return False
 
 def main():
     """Main interactive menu"""

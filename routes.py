@@ -17,6 +17,9 @@ def get_manager():
     """Get the current session's hockey team manager"""
     if 'session_id' not in session:
         session['session_id'] = generate_session_id()
+        print(f"Created new session: {session['session_id']}")
+    else:
+        print(f"Using existing session: {session['session_id']}")
     
     session_file = get_session_data_file(session['session_id'])
     return HockeyTeamManager(session_file)
@@ -28,6 +31,7 @@ def init_routes(app):
     def get_players():
         """Get all players for the current session"""
         manager = get_manager()
+        print(f"API returning {len(manager.players)} players")
         return jsonify(manager.players)
     
     @app.route('/api/players/add', methods=['POST'])
@@ -189,8 +193,11 @@ def init_routes(app):
         team_data = load_json_file(team_file)
         
         if team_data:
-            manager.load_players(team_data.get('players', []))
+            players = team_data.get('players', [])
+            print(f"Loading {len(players)} players for team {team_name}")
+            manager.load_players(players)
             manager.lines = team_data.get('lines', manager.lines)
+            print(f"Manager now has {len(manager.players)} players")
             return jsonify({"success": True, "message": f"Team '{team_name}' loaded successfully"})
         return jsonify({"success": False, "message": "Team not found"})
     
@@ -243,26 +250,99 @@ def init_routes(app):
             return jsonify({"success": True, "message": "Shared lines loaded successfully"})
         return jsonify({"success": False, "message": "Shared lines not found"})
     
-    @app.route('/api/print')
+    @app.route('/api/print-lines', methods=['GET'])
     def print_lines():
         """Generate print-friendly view of current lines"""
         manager = get_manager()
         current_date = datetime.now().strftime("%B %d, %Y")
         
-        # Generate print HTML (simplified version)
+        # Generate print HTML
         html_content = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <title>{APP_NAME} - Lines</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="icon" type="image/png" href="/static/images/favicon.png">
             <style>
-                body {{ font-family: Arial, sans-serif; margin: 20px; }}
-                .header {{ text-align: center; margin-bottom: 40px; }}
-                .line-section {{ margin-bottom: 35px; }}
-                .positions {{ display: flex; gap: 12px; justify-content: center; }}
-                .position {{ border: 2px solid #1e3a8a; padding: 12px 8px; min-width: 100px; text-align: center; }}
-                @media print {{ body {{ margin: 15px; }} }}
+                body {{ 
+                    font-family: Arial, sans-serif; 
+                    margin: 20px; 
+                    background: white;
+                    color: black;
+                }}
+                .header {{ 
+                    text-align: center; 
+                    margin-bottom: 40px; 
+                    border-bottom: 3px solid #1e3a8a;
+                    padding-bottom: 20px;
+                }}
+                .header h1 {{
+                    color: #1e3a8a;
+                    font-size: 28px;
+                    margin-bottom: 5px;
+                }}
+                .header p {{
+                    color: #fbbf24;
+                    font-style: italic;
+                    margin-bottom: 20px;
+                }}
+                .header h2 {{
+                    color: #3b82f6;
+                    font-size: 20px;
+                    margin: 0;
+                }}
+                .line-section {{ 
+                    margin-bottom: 35px; 
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 10px;
+                    padding: 20px;
+                }}
+                .line-title {{ 
+                    font-size: 20px; 
+                    font-weight: bold; 
+                    margin-bottom: 15px; 
+                    color: #1e3a8a;
+                    text-align: center;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }}
+                .positions {{ 
+                    display: flex; 
+                    gap: 12px; 
+                    margin-bottom: 12px; 
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }}
+                .position {{ 
+                    border: 2px solid #1e3a8a; 
+                    padding: 12px 8px; 
+                    min-width: 100px; 
+                    text-align: center; 
+                    background: white;
+                    border-radius: 6px;
+                }}
+                .position-label {{ 
+                    font-weight: bold; 
+                    color: #495057; 
+                    margin-bottom: 8px; 
+                    font-size: 12px;
+                    text-transform: uppercase;
+                }}
+                .player-name {{ 
+                    font-weight: bold; 
+                    color: black;
+                    font-size: 14px;
+                }}
+                .empty-position {{
+                    color: #6c757d;
+                    font-style: italic;
+                }}
+                @media print {{ 
+                    body {{ margin: 15px; }}
+                    .header {{ border-bottom: 2px solid #1e3a8a; }}
+                }}
             </style>
         </head>
         <body>
@@ -273,7 +353,59 @@ def init_routes(app):
             </div>
         """
         
-        # Add lines content here (simplified)
+        # Add each line
+        for line_num, line in manager.lines.items():
+            html_content += f'''
+                <div class="line-section">
+                    <div class="line-title">Line {line_num}</div>
+            '''
+            
+            # Add forwards row
+            forwards = []
+            if line.get('LW'): forwards.append(('LW', line['LW']['name']))
+            if line.get('C'): forwards.append(('C', line['C']['name']))
+            if line.get('RW'): forwards.append(('RW', line['RW']['name']))
+            
+            if forwards:
+                html_content += '<div class="positions">'
+                for pos, name in forwards:
+                    html_content += f'''
+                    <div class="position">
+                        <div class="position-label">{pos}</div>
+                        <div class="player-name">{name}</div>
+                    </div>
+                    '''
+                html_content += '</div>'
+            
+            # Add defense row
+            defense = []
+            if line.get('LD'): defense.append(('LD', line['LD']['name']))
+            if line.get('RD'): defense.append(('RD', line['RD']['name']))
+            
+            if defense:
+                html_content += '<div class="positions">'
+                for pos, name in defense:
+                    html_content += f'''
+                    <div class="position">
+                        <div class="position-label">{pos}</div>
+                        <div class="player-name">{name}</div>
+                    </div>
+                    '''
+                html_content += '</div>'
+            
+            # Add goalie (only for Line 1)
+            if line_num == "1" and line.get('G'):
+                html_content += f'''
+                <div class="positions">
+                    <div class="position">
+                        <div class="position-label">G</div>
+                        <div class="player-name">{line['G']['name']}</div>
+                    </div>
+                </div>
+                '''
+            
+            html_content += '</div>'
+        
         html_content += "</body></html>"
         
         return html_content
