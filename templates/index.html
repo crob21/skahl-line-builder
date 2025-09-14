@@ -436,12 +436,13 @@
         }
 
         .spare-player {
-            background: linear-gradient(135deg, #374151, #6b7280);
-            border: 1px solid #4b5563;
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            border: 2px solid #b91c1c;
+            color: white;
         }
 
         .spare-player:hover {
-            background: linear-gradient(135deg, #4b5563, #6b7280);
+            background: linear-gradient(135deg, #b91c1c, #dc2626);
         }
         
         .player-card.goalie {
@@ -462,6 +463,16 @@
         
         .spare-player.goalie:hover {
             background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .spare-player.in-position {
+            background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+            border: 2px solid #b91c1c !important;
+            color: white !important;
+        }
+        
+        .spare-player.in-position:hover {
+            background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
         }
 
         .player-card.goalie .position-indicator {
