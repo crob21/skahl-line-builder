@@ -252,40 +252,18 @@ class HockeyTeamManager:
     
     def load_kraken_roster(self):
         """Load default Seattle Kraken roster"""
-        import csv
-        
-        kraken_file = "kraken_roster.csv"
+        kraken_file = "data/teams/seattle_kraken.json"
         if os.path.exists(kraken_file):
             try:
                 with open(kraken_file, 'r') as f:
-                    csv_reader = csv.DictReader(f)
+                    data = json.load(f)
+                    players = data.get("players", [])
                     
-                    for row in csv_reader:
-                        last_name = row.get('last_name', '').strip()
-                        first_name = row.get('first_name', '').strip()
-                        jersey_number = row.get('jersey_number', '').strip()
-                        position = row.get('position', '').strip().upper()
-                        affiliate = row.get('affiliate', '').strip().upper()
-                        
-                        if last_name and first_name and position:
-                            valid_positions = ["FORWARD", "DEFENSE", "GOALIE"]
-                            if position in valid_positions:
-                                # Create full name
-                                full_name = f"{first_name} {last_name}"
-                                
-                                player = {
-                                    "name": full_name,
-                                    "first_name": first_name,
-                                    "last_name": last_name,
-                                    "jersey_number": jersey_number,
-                                    "roster_position": position,
-                                    "affiliate": affiliate == "YES",
-                                    "id": len(self.players) + 1
-                                }
-                                self.players.append(player)
+                    # Load all players from the JSON file
+                    self.players = players
                 
                 self.save_data()
-                print("✅ Loaded Seattle Kraken roster!")
+                print(f"✅ Loaded Seattle Kraken roster with {len(players)} players!")
             except Exception as e:
                 print(f"⚠️  Error loading Kraken roster: {e}")
         else:
