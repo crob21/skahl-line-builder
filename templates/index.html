@@ -1191,9 +1191,17 @@
                         if (player) {
                             const slot = document.querySelector(`[data-line="${lineNum}"][data-position="${position}"]`);
                             if (slot) {
-                                const playerCardClass = (player.roster_position === 'GOALIE' || player.position === 'GOALIE') ? 'player-card goalie' : 'player-card';
+                                let playerCardClass = 'player-card';
+                                if (player.affiliate) {
+                                    playerCardClass += ' spare-player';
+                                }
+                                if (player.roster_position === 'GOALIE' || player.position === 'GOALIE') {
+                                    playerCardClass += ' goalie';
+                                }
+                                playerCardClass += ' in-position';
+                                
                                 slot.innerHTML = `
-                                    <div class="${playerCardClass} in-position" data-player-id="${player.id}" draggable="true">
+                                    <div class="${playerCardClass}" data-player-id="${player.id}" draggable="true">
                                         <div class="position-indicator">${position}</div>
                                         <div class="player-name">${player.name}</div>
                                         <button onclick="removeFromLine(${player.id})" class="remove-btn">×</button>
