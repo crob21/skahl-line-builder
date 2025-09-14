@@ -139,7 +139,7 @@ def init_routes(app):
         
         return jsonify({
             "success": True, 
-            "message": f"Team uploaded successfully. {actual_count} players loaded."
+            "message": f"Team uploaded successfully! {actual_count} players loaded."
         })
     
     @app.route('/api/teams/download')
