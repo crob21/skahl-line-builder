@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🦭 Mobile Fix Test - Line Walrus</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .debug-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .debug-section h3 {
+            margin-top: 0;
+            color: #ffd700;
+            font-size: 1.2em;
+        }
+        
+        .player-card {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+        
+        .player-card.selected {
+            background: rgba(76, 175, 80, 0.4);
+            border-color: #4CAF50;
+            transform: scale(1.05);
+        }
+        
+        .position-slot {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+        
+        .position-slot.occupied {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+            border-style: solid;
+        }
+        
+        .line-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .line-header {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+        
+        .log-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .status {
+            padding: 8px;
+            border-radius: 6px;
+            margin: 8px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4CAF50;
+        }
+        
+        .status.warning {
+            background: rgba(255, 193, 7, 0.3);
+            border: 1px solid #ffc107;
+        }
+        
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            width: 100%;
+            transition: background 0.3s;
+            touch-action: manipulation;
+        }
+        
+        .test-button:active {
+            background: #3d8b40;
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦭 Mobile Fix Test</h1>
+        
+        <div class="debug-section">
+            <h3>🎯 Simplified Touch Test</h3>
+            <div class="player-card" data-player-id="1" data-player-name="Test Player 1">
+                Test Player 1 (LW)
+            </div>
+            <div class="player-card" data-player-id="2" data-player-name="Test Player 2">
+                Test Player 2 (C)
+            </div>
+            <div class="player-card" data-player-id="3" data-player-name="Test Player 3">
+                Test Player 3 (RW)
+            </div>
+            <div id="playerStatus" class="status warning">
+                No player selected
+            </div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>🏒 Position Slots</h3>
+            <div class="line-container">
+                <div class="line-header">Line 1</div>
+                <div class="position-slot" data-line="1" data-position="LW">LW</div>
+                <div class="position-slot" data-line="1" data-position="C">C</div>
+                <div class="position-slot" data-line="1" data-position="RW">RW</div>
+            </div>
+            <div class="line-container">
+                <div class="line-header">Line 2</div>
+                <div class="position-slot" data-line="2" data-position="LW">LW</div>
+                <div class="position-slot" data-line="2" data-position="C">C</div>
+                <div class="position-slot" data-line="2" data-position="RW">RW</div>
+            </div>
+            <div id="positionStatus" class="status warning">
+                No position selected
+            </div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>🧪 Test Controls</h3>
+            <button class="test-button" onclick="clearSelection()">
+                Clear Selection
+            </button>
+            <button class="test-button" onclick="clearLogs()">
+                Clear Logs
+            </button>
+        </div>
+        
+        <div class="debug-section">
+            <h3>📋 Debug Logs</h3>
+            <div class="log-area" id="logArea">Ready for testing...\n</div>
+        </div>
+    </div>
+
+    <script>
+        let selectedPlayer = null;
+        let selectedPlayerElement = null;
+        let logArea = document.getElementById('logArea');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const emoji = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'debug': '🔍'
+            };
+            
+            const logEntry = `[${timestamp}] ${emoji[type] || '📝'} ${message}\n`;
+            logArea.textContent += logEntry;
+            logArea.scrollTop = logArea.scrollHeight;
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function selectPlayer(playerId, playerName, element) {
+            // Clear previous selection
+            if (selectedPlayerElement) {
+                selectedPlayerElement.classList.remove('selected');
+            }
+            
+            // Select new player
+            selectedPlayer = { id: playerId, name: playerName };
+            selectedPlayerElement = element;
+            element.classList.add('selected');
+            
+            log(`Selected player: ${playerName} (ID: ${playerId})`, 'success');
+            
+            document.getElementById('playerStatus').textContent = `Selected: ${playerName}`;
+            document.getElementById('playerStatus').className = 'status success';
+        }
+        
+        function placePlayerInPosition(line, position, element) {
+            if (!selectedPlayer) {
+                log('No player selected. Tap a player first.', 'warning');
+                document.getElementById('positionStatus').textContent = 'No player selected';
+                document.getElementById('positionStatus').className = 'status warning';
+                return;
+            }
+            
+            log(`Placing ${selectedPlayer.name} in Line ${line} ${position}`, 'success');
+            
+            // Visual feedback
+            element.classList.add('occupied');
+            element.textContent = selectedPlayer.name;
+            
+            document.getElementById('positionStatus').textContent = 
+                `Placed: ${selectedPlayer.name} in Line ${line} ${position}`;
+            document.getElementById('positionStatus').className = 'status success';
+            
+            // Clear selection
+            clearSelection();
+        }
+        
+        function clearSelection() {
+            if (selectedPlayerElement) {
+                selectedPlayerElement.classList.remove('selected');
+            }
+            
+            selectedPlayer = null;
+            selectedPlayerElement = null;
+            
+            log('Selection cleared', 'info');
+            
+            document.getElementById('playerStatus').textContent = 'No player selected';
+            document.getElementById('playerStatus').className = 'status warning';
+        }
+        
+        function clearLogs() {
+            logArea.textContent = 'Logs cleared...\n';
+            log('Ready for new tests', 'info');
+        }
+        
+        // SIMPLIFIED MOBILE TOUCH HANDLING
+        function setupSimplifiedTouch() {
+            log('Setting up simplified touch handling...', 'debug');
+            
+            // Player cards - use click events (works on both mobile and desktop)
+            const playerCards = document.querySelectorAll('.player-card');
+            playerCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const playerId = this.dataset.playerId;
+                    const playerName = this.dataset.playerName;
+                    
+                    log(`Player card clicked: ${playerName}`, 'debug');
+                    selectPlayer(playerId, playerName, this);
+                });
+            });
+            
+            // Position slots - use click events
+            const positionSlots = document.querySelectorAll('.position-slot');
+            positionSlots.forEach(slot => {
+                slot.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const line = this.dataset.line;
+                    const position = this.dataset.position;
+                    
+                    log(`Position slot clicked: Line ${line} ${position}`, 'debug');
+                    placePlayerInPosition(line, position, this);
+                });
+            });
+            
+            log('Simplified touch handling setup complete', 'success');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🦭 Mobile Fix Test loaded', 'info');
+            setupSimplifiedTouch();
+            
+            log('Ready for testing!', 'success');
+            log('Instructions:', 'info');
+            log('1. Tap a player card to select it', 'info');
+            log('2. Tap a position slot to place the player', 'info');
+            log('3. Watch the logs for click events', 'info');
+        });
+    </script>
+</body>
+</html>
