@@ -184,4 +184,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Built with ❤️ for hockey coaches and team managers**
+**Built with ❤️ for hockey coaches and team managers**# Force deployment Sun Sep 14 15:38:47 PDT 2025
