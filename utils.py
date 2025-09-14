@@ -87,11 +87,26 @@ def parse_csv_data(csv_content: str) -> List[Dict]:
             # Handle different column names for affiliate status
             affiliate_value = row.get('Affiliate', '') or row.get('Affiliate Status', '')
             
+            # Handle SportNinja position format (Skater, Goalie, Defense, Forward)
+            position = row.get('Position', '').upper()
+            if position == 'SKATER':
+                # For skaters, we'll assign a generic position that can be changed later
+                roster_position = 'SKATER'
+            elif position == 'GOALIE':
+                roster_position = 'GOALIE'
+            elif position == 'DEFENSE':
+                roster_position = 'DEFENSE'
+            elif position == 'FORWARD':
+                roster_position = 'FORWARD'
+            else:
+                # Fallback for other formats (LW, C, RW, D, G)
+                roster_position = position
+            
             player = {
                 'id': f"player_{len(players) + 1}",
                 'name': f"{row.get('Last Name', '')} {row.get('First Name', '')}".strip(),
                 'jersey': row.get('Jersey Number', ''),
-                'roster_position': row.get('Position', '').upper(),
+                'roster_position': roster_position,
                 'affiliate': affiliate_value.upper() == 'YES',
                 'location': 'spares' if affiliate_value.upper() == 'YES' else 'bench'
             }
