@@ -5,6 +5,8 @@ Flask routes and API endpoints for the hockey line builder application.
 
 from flask import request, jsonify, session
 from datetime import datetime
+import os
+import json
 from hockey_manager import HockeyTeamManager
 from utils import (
     generate_session_id, generate_line_id, get_session_data_file,
@@ -76,8 +78,11 @@ def init_routes(app):
         data = request.json
         
         player_id = data.get('player_id')
-        line = data.get('line')
+        line = data.get('line') or data.get('line_num')  # Support both 'line' and 'line_num'
         position = data.get('position')
+        
+        if not line:
+            return jsonify({"success": False, "message": "Line parameter missing"})
         
         if manager.set_player_in_line(player_id, line, position):
             return jsonify({"success": True, "message": "Player placed successfully"})
@@ -206,6 +211,58 @@ def init_routes(app):
         """List all available teams"""
         teams = list_team_files()
         return jsonify(teams)
+    
+    @app.route('/api/teams/delete', methods=['POST'])
+    def delete_team():
+        """Delete a saved team"""
+        data = request.json
+        team_name = data.get('team_name')
+        
+        if not team_name:
+            return jsonify({"success": False, "message": "Team name required"})
+        
+        team_file = f"data/teams/{team_name}.json"
+        if os.path.exists(team_file):
+            try:
+                os.remove(team_file)
+                print(f"🗑️ Deleted team: {team_name}")
+                return jsonify({"success": True, "message": f"Team '{team_name}' deleted successfully"})
+            except Exception as e:
+                return jsonify({"success": False, "message": f"Error deleting team: {str(e)}"})
+        else:
+            return jsonify({"success": False, "message": "Team not found"})
+    
+    @app.route('/api/teams/update', methods=['POST'])
+    def update_team():
+        """Update a saved team with current roster and lines"""
+        data = request.json
+        team_name = data.get('team_name')
+        
+        if not team_name:
+            return jsonify({"success": False, "message": "Team name required"})
+        
+        manager = get_manager()
+        
+        # Create team data with current roster and lines
+        team_data = {
+            "name": team_name,
+            "players": manager.players,
+            "lines": manager.lines,
+            "created": datetime.now().isoformat(),
+            "updated": datetime.now().isoformat()
+        }
+        
+        # Save to file
+        team_file = f"data/teams/{team_name}.json"
+        try:
+            os.makedirs(os.path.dirname(team_file), exist_ok=True)
+            with open(team_file, 'w') as f:
+                json.dump(team_data, f, indent=2)
+            
+            print(f"🔄 Updated team: {team_name} with {len(manager.players)} players")
+            return jsonify({"success": True, "message": f"Team '{team_name}' updated successfully"})
+        except Exception as e:
+            return jsonify({"success": False, "message": f"Error updating team: {str(e)}"})
     
     @app.route('/api/lines/save', methods=['POST'])
     def save_lines():
@@ -353,8 +410,14 @@ def init_routes(app):
             </div>
         """
         
-        # Add each line
+        # Add each line (ensure we only process each line once)
+        processed_lines = set()
         for line_num, line in manager.lines.items():
+            # Convert to int to avoid duplicates (e.g., "1" and 1)
+            line_key = int(line_num) if isinstance(line_num, str) else line_num
+            if line_key in processed_lines:
+                continue
+            processed_lines.add(line_key)
             html_content += f'''
                 <div class="line-section">
                     <div class="line-title">Line {line_num}</div>

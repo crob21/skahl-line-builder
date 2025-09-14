@@ -21,8 +21,6 @@
             color: white;
             min-height: 100vh;
             padding: 20px;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
         }
 
         .container {
@@ -438,15 +436,12 @@
         }
 
         .spare-player {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-            border: 2px solid #b91c1c;
-            color: white;
+            background: linear-gradient(135deg, #374151, #6b7280);
+            border: 1px solid #4b5563;
         }
 
         .spare-player:hover {
-            background: linear-gradient(135deg, #b91c1c, #dc2626);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+            background: linear-gradient(135deg, #4b5563, #6b7280);
         }
         
         .player-card.goalie {
@@ -460,26 +455,13 @@
         }
         
         .spare-player.goalie {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-            color: white;
-            border: 2px solid #b91c1c;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #333;
+            border: 1px solid #d97706;
         }
         
         .spare-player.goalie:hover {
-            background: linear-gradient(135deg, #b91c1c, #dc2626);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-        }
-
-        /* Keep spare player red color when in position */
-        .spare-player.in-position {
-            background: linear-gradient(135deg, #dc2626, #ef4444) !important;
-            border: 2px solid #b91c1c !important;
-            color: white !important;
-        }
-
-        .spare-player.in-position:hover {
-            background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
 
         .player-card.goalie .position-indicator {
@@ -565,20 +547,6 @@
 
         .clear-line:hover {
             background: #555;
-        }
-
-        /* Mobile Scrolling Prevention */
-        @media (max-width: 768px) {
-            body {
-                position: relative;
-                overflow-x: hidden;
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            html {
-                overflow-x: hidden;
-                -webkit-overflow-scrolling: touch;
-            }
         }
 
         /* Mobile Optimizations */
@@ -914,6 +882,10 @@
                             </select>
                             <button onclick="loadTeam()" class="btn-load">📂 Load Team</button>
                         </div>
+                        <div class="team-row">
+                            <button onclick="updateTeam()" class="btn-update" style="background: #28a745;">🔄 Update Team</button>
+                            <button onclick="deleteTeam()" class="btn-delete" style="background: #dc3545;">🗑️ Delete Team</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1191,17 +1163,9 @@
                         if (player) {
                             const slot = document.querySelector(`[data-line="${lineNum}"][data-position="${position}"]`);
                             if (slot) {
-                                let playerCardClass = 'player-card';
-                                if (player.affiliate) {
-                                    playerCardClass += ' spare-player';
-                                }
-                                if (player.roster_position === 'GOALIE' || player.position === 'GOALIE') {
-                                    playerCardClass += ' goalie';
-                                }
-                                playerCardClass += ' in-position';
-                                
+                                const playerCardClass = (player.roster_position === 'GOALIE' || player.position === 'GOALIE') ? 'player-card goalie' : 'player-card';
                                 slot.innerHTML = `
-                                    <div class="${playerCardClass}" data-player-id="${player.id}" draggable="true">
+                                    <div class="${playerCardClass} in-position" data-player-id="${player.id}" draggable="true">
                                         <div class="position-indicator">${position}</div>
                                         <div class="player-name">${player.name}</div>
                                         <button onclick="removeFromLine(${player.id})" class="remove-btn">×</button>
@@ -1498,6 +1462,77 @@
             }
         }
 
+        async function updateTeam() {
+            const teamSelect = document.getElementById('teamSelect');
+            const filename = teamSelect.value;
+            
+            if (!filename) {
+                alert('Please select a team to update');
+                return;
+            }
+            
+            // Extract team name from filename (remove .json extension)
+            const teamName = filename.replace('.json', '');
+            
+            if (!confirm(`Update team "${teamName}" with current roster and lines?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/teams/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ team_name: teamName })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    loadTeamList(); // Refresh the team list
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error updating team: ' + error.message);
+            }
+        }
+
+        async function deleteTeam() {
+            const teamSelect = document.getElementById('teamSelect');
+            const filename = teamSelect.value;
+            
+            if (!filename) {
+                alert('Please select a team to delete');
+                return;
+            }
+            
+            // Extract team name from filename (remove .json extension)
+            const teamName = filename.replace('.json', '');
+            
+            if (!confirm(`Are you sure you want to delete team "${teamName}"? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/teams/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ team_name: teamName })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    loadTeamList(); // Refresh the team list
+                    teamSelect.value = ''; // Clear selection
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error deleting team: ' + error.message);
+            }
+        }
+
         async function loadTeamList() {
             try {
                 const response = await fetch('/api/teams/list');
@@ -1633,24 +1668,13 @@
         // Mobile-first player placement system
         let selectedPlayer = null;
         let selectedPlayerElement = null;
-        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                      ('ontouchstart' in window) || 
-                      (navigator.maxTouchPoints > 0);
-
-        console.log('Mobile detection:', { 
-            userAgent: navigator.userAgent,
-            isMobile: isMobile,
-            touchSupport: 'ontouchstart' in window,
-            maxTouchPoints: navigator.maxTouchPoints
-        });
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         function setupMobilePlayerPlacement() {
             if (isMobile) {
-                console.log('Setting up mobile touch placement');
                 // Mobile: Use touch events only
                 setupMobileTouchPlacement();
             } else {
-                console.log('Setting up desktop click placement');
                 // Desktop: Use click events
                 setupDesktopClickPlacement();
             }
@@ -1661,12 +1685,9 @@
             let touchStartX = 0;
             let touchStartY = 0;
             let isDragging = false;
-            let touchTarget = null;
 
             // Touch start - detect what was touched
             document.addEventListener('touchstart', function(e) {
-                e.preventDefault(); // Prevent default to avoid conflicts
-                
                 const playerCard = e.target.closest('.player-card');
                 const positionSlot = e.target.closest('.position-slot');
                 
@@ -1674,15 +1695,8 @@
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
                 isDragging = false;
-                touchTarget = playerCard || positionSlot;
 
-                console.log('Touch start:', { 
-                    playerCard: !!playerCard, 
-                    positionSlot: !!positionSlot, 
-                    selectedPlayer: !!selectedPlayer,
-                    target: e.target.tagName,
-                    className: e.target.className
-                });
+                console.log('Touch start:', { playerCard: !!playerCard, positionSlot: !!positionSlot, selectedPlayer: !!selectedPlayer });
 
                 // Visual feedback for touch
                 if (playerCard && !playerCard.classList.contains('in-position')) {
@@ -1693,7 +1707,7 @@
                     positionSlot.style.transform = 'scale(0.95)';
                     positionSlot.style.opacity = '0.8';
                 }
-            }, { passive: false });
+            }, { passive: true });
 
             // Touch move - detect if user is dragging
             document.addEventListener('touchmove', function(e) {
@@ -1713,8 +1727,6 @@
 
             // Touch end - handle the action
             document.addEventListener('touchend', function(e) {
-                e.preventDefault(); // Prevent default to avoid conflicts
-                
                 const touchEndTime = Date.now();
                 const touchEndX = e.changedTouches[0].clientX;
                 const touchEndY = e.changedTouches[0].clientY;
@@ -1733,8 +1745,10 @@
 
                 // Only handle if it's a tap (not a drag)
                 if (!isDragging && touchEndTime - touchStartTime < 500 && distance < 10) {
-                    const playerCard = touchTarget && touchTarget.classList.contains('player-card') ? touchTarget : e.target.closest('.player-card');
-                    const positionSlot = touchTarget && touchTarget.classList.contains('position-slot') ? touchTarget : e.target.closest('.position-slot');
+                    e.preventDefault();
+                    
+                    const playerCard = e.target.closest('.player-card');
+                    const positionSlot = e.target.closest('.position-slot');
                     
                     console.log('Touch end - tap detected:', { 
                         playerCard: !!playerCard, 
@@ -1742,18 +1756,17 @@
                         selectedPlayer: !!selectedPlayer,
                         isDragging: isDragging,
                         duration: touchEndTime - touchStartTime,
-                        distance: distance,
-                        touchTarget: touchTarget ? touchTarget.className : 'none'
+                        distance: distance
                     });
                     
                     if (playerCard && !playerCard.classList.contains('in-position')) {
                         // Select player
-                        console.log('Selecting player:', playerCard.querySelector('.player-name')?.textContent);
+                        console.log('Selecting player');
                         selectPlayer(playerCard);
                         showFeedback('Player selected! Tap a position to place.', 'info');
                     } else if (positionSlot && selectedPlayer) {
                         // Place player
-                        console.log('Placing player in position:', positionSlot.dataset.position, positionSlot.dataset.line);
+                        console.log('Placing player in position');
                         placePlayerInPosition(positionSlot);
                     } else if (!playerCard && !positionSlot) {
                         // Deselect
@@ -1773,7 +1786,6 @@
                 touchStartY = undefined;
                 touchStartTime = 0;
                 isDragging = false;
-                touchTarget = null;
             }, { passive: false });
         }
 
@@ -2013,124 +2025,7 @@
             document.addEventListener('DOMContentLoaded', function() {
                 setupMobileTouch();
                 setupMobilePlayerPlacement();
-                
-                // Apply mobile touch fix after a delay to ensure all elements are loaded
-                setTimeout(function() {
-                    console.log('🔧 Applying mobile touch fix...');
-                    fixMobileTouchInteractions();
-                }, 2000);
             });
-            
-            // Mobile Touch Fix Function
-            function fixMobileTouchInteractions() {
-                console.log('🦭 Applying mobile touch fix...');
-                
-                // Variables for player selection
-                let selectedPlayer = null;
-                let selectedPlayerElement = null;
-                
-                // Function to select a player
-                function selectPlayer(playerId, playerName, element) {
-                    // Clear previous selection
-                    if (selectedPlayerElement) {
-                        selectedPlayerElement.classList.remove('selected');
-                    }
-                    
-                    // Select new player
-                    selectedPlayer = { id: playerId, name: playerName };
-                    selectedPlayerElement = element;
-                    element.classList.add('selected');
-                    
-                    console.log(`✅ Selected player: ${playerName} (ID: ${playerId})`);
-                }
-                
-                // Function to place player in position
-                function placePlayerInPosition(line, position, element) {
-                    if (!selectedPlayer) {
-                        console.log('⚠️ No player selected. Tap a player first.');
-                        return;
-                    }
-                    
-                    console.log(`✅ Placing ${selectedPlayer.name} in Line ${line} ${position}`);
-                    
-                    // Make API call to place player
-                    fetch('/api/lines/set-player', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            player_id: selectedPlayer.id,
-                            line: line,
-                            position: position
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log(`✅ Player placed successfully: ${data.message}`);
-                            // Update the UI
-                            element.classList.add('occupied');
-                            element.textContent = selectedPlayer.name;
-                            
-                            // Clear selection
-                            clearSelection();
-                        } else {
-                            console.log(`❌ Failed to place player: ${data.message}`);
-                        }
-                    })
-                    .catch(error => {
-                        console.log(`❌ Error placing player: ${error}`);
-                    });
-                }
-                
-                // Function to clear selection
-                function clearSelection() {
-                    if (selectedPlayerElement) {
-                        selectedPlayerElement.classList.remove('selected');
-                    }
-                    
-                    selectedPlayer = null;
-                    selectedPlayerElement = null;
-                    
-                    console.log('ℹ️ Selection cleared');
-                }
-                
-                // Add simplified click event listeners
-                document.addEventListener('click', function(e) {
-                    const playerCard = e.target.closest('.player-card');
-                    const positionSlot = e.target.closest('.position-slot');
-                    
-                    if (playerCard && !playerCard.classList.contains('in-position')) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        const playerId = playerCard.dataset.playerId;
-                        const playerName = playerCard.dataset.playerName;
-                        
-                        if (playerId && playerName) {
-                            console.log(`🎯 Player card clicked: ${playerName}`);
-                            selectPlayer(playerId, playerName, playerCard);
-                        }
-                    }
-                    
-                    if (positionSlot) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        const line = positionSlot.dataset.line;
-                        const position = positionSlot.dataset.position;
-                        
-                        if (line && position) {
-                            console.log(`🎯 Position slot clicked: Line ${line} ${position}`);
-                            placePlayerInPosition(line, position, positionSlot);
-                        }
-                    }
-                });
-                
-                console.log('✅ Mobile touch fix applied successfully!');
-                console.log('📱 Touch interactions should now work on mobile devices');
-            }
     </script>
 </body>
 </html>
