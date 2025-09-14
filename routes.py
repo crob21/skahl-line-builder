@@ -134,9 +134,12 @@ def init_routes(app):
         players = parse_csv_data(content)
         manager.load_players(players)
         
+        # Get the actual count of players loaded
+        actual_count = len(manager.players)
+        
         return jsonify({
             "success": True, 
-            "message": f"Team uploaded successfully. {len(players)} players loaded."
+            "message": f"Team uploaded successfully! {actual_count} players loaded."
         })
     
     @app.route('/api/teams/download')
