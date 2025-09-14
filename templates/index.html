@@ -858,7 +858,7 @@
                         <h4>📁 Import/Export</h4>
                         <div class="team-row">
                             <input type="file" id="csvFile" accept=".csv" style="display: none;">
-                            <button onclick="console.log('🔘 Upload button clicked'); document.getElementById('csvFile').click();" class="btn-upload">📁 Upload CSV</button>
+                            <button onclick="document.getElementById('csvFile').click();" class="btn-upload">📁 Upload CSV</button>
                             <button onclick="downloadTeam()" class="btn-download">💾 Download CSV</button>
                         </div>
                         <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 5px; font-style: italic;">
@@ -1349,37 +1349,32 @@
         }
 
         function setupFileUpload() {
-            console.log('🔧 Setting up file upload...');
             const fileInput = document.getElementById('csvFile');
             if (!fileInput) {
-                console.error('❌ CSV file input not found!');
+                console.error('CSV file input not found!');
                 return;
             }
-            console.log('✅ CSV file input found');
             
             fileInput.addEventListener('change', async function(e) {
-                console.log('📁 File input changed');
                 const file = e.target.files[0];
                 if (!file) {
-                    console.log('❌ No file selected');
                     return;
                 }
-                
-                console.log('📄 File selected:', file.name, file.size, file.type);
                 
                 const formData = new FormData();
                 formData.append('file', file);
                 
                 try {
-                    console.log('🚀 Uploading file...');
                     const response = await fetch('/api/teams/upload', {
                         method: 'POST',
                         body: formData
                     });
                     
-                    console.log('📡 Response received:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
                     const result = await response.json();
-                    console.log('📋 Result:', result);
                     
                     if (result.success) {
                         alert(result.message);
@@ -1390,7 +1385,7 @@
                         alert('Error: ' + result.message);
                     }
                 } catch (error) {
-                    console.error('❌ Upload error:', error);
+                    console.error('Upload error:', error);
                     alert('Error uploading file: ' + error.message);
                 }
                 
@@ -1538,6 +1533,10 @@
                     body: JSON.stringify({ team_name: teamName })
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
                 if (result.success) {
                     alert(result.message);
@@ -1547,6 +1546,7 @@
                     alert('Error: ' + result.message);
                 }
             } catch (error) {
+                console.error('Delete team error:', error);
                 alert('Error deleting team: ' + error.message);
             }
         }
