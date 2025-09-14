@@ -84,13 +84,16 @@ def parse_csv_data(csv_content: str) -> List[Dict]:
     try:
         csv_reader = csv.DictReader(csv_content.splitlines())
         for row in csv_reader:
+            # Handle different column names for affiliate status
+            affiliate_value = row.get('Affiliate', '') or row.get('Affiliate Status', '')
+            
             player = {
                 'id': f"player_{len(players) + 1}",
                 'name': f"{row.get('Last Name', '')} {row.get('First Name', '')}".strip(),
                 'jersey': row.get('Jersey Number', ''),
                 'roster_position': row.get('Position', '').upper(),
-                'affiliate': row.get('Affiliate', '').upper() == 'YES',
-                'location': 'spares' if row.get('Affiliate', '').upper() == 'YES' else 'bench'
+                'affiliate': affiliate_value.upper() == 'YES',
+                'location': 'spares' if affiliate_value.upper() == 'YES' else 'bench'
             }
             players.append(player)
     except Exception as e:
