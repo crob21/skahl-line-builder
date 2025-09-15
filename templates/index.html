@@ -2070,8 +2070,6 @@
             let selectedPlayerElement = null;
             
             function selectPlayer(playerId, playerName, element) {
-                console.log('📱 Selecting player:', playerName);
-                
                 // Clear previous selection
                 if (selectedPlayerElement) {
                     selectedPlayerElement.style.background = '';
@@ -2092,8 +2090,6 @@
                     return;
                 }
                 
-                console.log('📱 Placing', selectedPlayer.name, 'in line', line, position);
-                
                 fetch('/api/lines/set-player', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2106,7 +2102,6 @@
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
-                        console.log('✅ Player placed successfully');
                         loadLines();
                         loadPlayers();
                         // Clear selection
@@ -2129,8 +2124,6 @@
             
             // Add simple click handlers
             document.addEventListener('click', function(e) {
-                console.log('📱 Click detected on:', e.target);
-                
                 const playerCard = e.target.closest('.player-card');
                 const positionSlot = e.target.closest('.position-slot');
                 
@@ -2155,8 +2148,6 @@
                     return;
                 }
             });
-            
-            console.log('✅ Simple mobile touch fix applied!');
         }
 
                     // Initialize all functionality when page loads
@@ -2166,7 +2157,6 @@
                 
                 // Apply simple mobile touch fix after a delay
                 setTimeout(function() {
-                    console.log('🔧 Applying SIMPLE mobile touch fix...');
                     fixMobileTouchInteractions();
                 }, 3000);
             });

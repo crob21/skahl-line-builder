@@ -82,11 +82,8 @@ def parse_csv_data(csv_content: str) -> List[Dict]:
     """Parse CSV content into player data"""
     players = []
     try:
-        print(f"🔧 CSV Content length: {len(csv_content)}")
         csv_reader = csv.DictReader(csv_content.splitlines())
-        print(f"🔧 CSV Headers: {csv_reader.fieldnames}")
         for row in csv_reader:
-            print(f"🔧 Processing row: {row}")
             # Handle different column names for affiliate status
             affiliate_value = row.get('Affiliate', '') or row.get('Affiliate Status', '')
             
@@ -114,7 +111,6 @@ def parse_csv_data(csv_content: str) -> List[Dict]:
                 'location': 'spares' if affiliate_value.upper() == 'YES' else 'bench'
             }
             players.append(player)
-        print(f"🔧 Parsed {len(players)} players from CSV")
     except Exception as e:
         print(f"Error parsing CSV: {e}")
     return players
