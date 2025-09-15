@@ -1275,11 +1275,20 @@
         async function removePlayer(playerId) {
             console.log(`🔍 Removing player with ID: ${playerId} (type: ${typeof playerId})`);
             
+            // Get current team name if one is selected
+            const teamSelect = document.getElementById('teamSelect');
+            const selectedOption = teamSelect.options[teamSelect.selectedIndex];
+            const teamName = selectedOption && selectedOption.value ? 
+                selectedOption.textContent.split(' (')[0] : null;
+            
             try {
                 const response = await fetch('/api/players/remove', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ player_id: playerId })
+                    body: JSON.stringify({ 
+                        player_id: playerId,
+                        team_name: teamName
+                    })
                 });
                 
                 const result = await response.json();
@@ -1288,6 +1297,9 @@
                 if (result.success) {
                     loadPlayers();
                     loadLines();
+                    if (teamName) {
+                        loadTeamList(); // Refresh team list to show updated player count
+                    }
                 } else {
                     alert('Error: ' + result.message);
                 }
