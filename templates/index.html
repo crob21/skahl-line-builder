@@ -1477,7 +1477,7 @@
                 const response = await fetch('/api/teams/load', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename: filename })
+                    body: JSON.stringify({ team_name: filename })
                 });
                 
                 const result = await response.json();
@@ -2058,13 +2058,17 @@
             }, { passive: true });
         }
 
-        // Simple Mobile Touch Fix
-        function fixMobileTouchInteractions() {
-            console.log('🦭 Applying SIMPLE mobile touch fix...');
-            
-            // Remove all existing event listeners by cloning and replacing the body
-            const newBody = document.body.cloneNode(true);
-            document.body.parentNode.replaceChild(newBody, document.body);
+        // Device Detection
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   window.innerWidth <= 768;
+        }
+
+        // Mobile Touch Handler (only for mobile devices)
+        function setupMobileTouchHandler() {
+            if (!isMobileDevice()) {
+                return; // Skip mobile setup on desktop
+            }
             
             let selectedPlayer = null;
             let selectedPlayerElement = null;
@@ -2074,6 +2078,7 @@
                 if (selectedPlayerElement) {
                     selectedPlayerElement.style.background = '';
                     selectedPlayerElement.style.border = '';
+                    selectedPlayerElement.style.color = '';
                 }
                 
                 // Select new player
@@ -2122,7 +2127,7 @@
                 });
             }
             
-            // Add simple click handlers
+            // Add mobile-specific click handlers (only on mobile)
             document.addEventListener('click', function(e) {
                 const playerCard = e.target.closest('.player-card');
                 const positionSlot = e.target.closest('.position-slot');
@@ -2150,16 +2155,18 @@
             });
         }
 
-                    // Initialize all functionality when page loads
-            document.addEventListener('DOMContentLoaded', function() {
-                // Only setup basic mobile touch, skip the complex handlers
-                setupMobileTouch();
-                
-                // Apply simple mobile touch fix after a delay
-                setTimeout(function() {
-                    fixMobileTouchInteractions();
-                }, 3000);
-            });
+        // Initialize all functionality when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup basic functionality
+            setupMobileTouch();
+            
+            // Setup device-specific handlers
+            if (isMobileDevice()) {
+                // Mobile: Use touch handler
+                setupMobileTouchHandler();
+            }
+            // Desktop: Use existing drag-and-drop (no additional setup needed)
+        });
     </script>
 </body>
 </html>
