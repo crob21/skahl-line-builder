@@ -1361,6 +1361,9 @@
                                     </div>
                                 `;
                                 
+                                console.log(`🔍 Created player card for ${player.name} with ID ${player.id} (type: ${typeof player.id})`);
+                                console.log(`🔍 Button HTML:`, slot.querySelector('.remove-btn'));
+                                
                                 // Add drag event listeners to the player card
                                 const playerCard = slot.querySelector('.player-card');
                                 if (playerCard) {
