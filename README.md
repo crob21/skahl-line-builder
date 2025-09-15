@@ -1,19 +1,25 @@
-# 🏒 SKAHL Line Builder
+# 🦭 Line Walrus
 
-A professional hockey line management web application for coaches and team managers. Build, organize, and print hockey lines with drag-and-drop functionality.
+**"Because Even a Walrus Can Manage Lines Better"**
 
+A professional hockey line management web application for coaches and team managers. Build, organize, and print hockey lines with drag-and-drop functionality and mobile-friendly touch controls.
+
+**Live App**: [https://www.linewalrus.com](https://www.linewalrus.com)  
 **Repository**: [crob21/skahl-line-builder](https://github.com/crob21/skahl-line-builder)
 
 ## ✨ Features
 
-- **Drag & Drop Interface**: Intuitive player positioning
+- **Drag & Drop Interface**: Intuitive player positioning (desktop)
+- **Mobile Touch Controls**: Click-to-select player placement (mobile)
 - **Real-time Updates**: No page refreshes needed
 - **Team Management**: Upload/Download CSV files, save/load teams
 - **Smart Print**: Professional line sheets with current date
 - **Position Indicators**: Visual badges for positions
 - **Goalie Styling**: Special gold styling for goalies
-- **Affiliate Players**: Separate "Spares" section
+- **Red Spare Players**: Distinct red styling for affiliate/spare players
 - **SportNinja Integration**: Compatible with SportNinja CSV exports
+- **Shared Line URLs**: Save and share specific line combinations
+- **Team CRUD Operations**: Create, read, update, and delete saved teams
 
 ## 🚀 Quick Start
 
@@ -42,7 +48,7 @@ A professional hockey line management web application for coaches and team manag
 
 4. **Run the application**
    ```bash
-   python app.py
+   python app_simple.py
    ```
 
 5. **Access the app**
@@ -52,27 +58,38 @@ A professional hockey line management web application for coaches and team manag
 ## 📁 Project Structure
 
 ```
-skahl-line-builder/
-├── app.py                 # Main Flask application
-├── hockey_manager.py      # Team management logic
-├── requirements.txt       # Python dependencies
-├── Procfile              # Heroku deployment configuration
+line-walrus/
+├── app_simple.py         # Main Flask application (modular)
+├── config.py             # Configuration settings
+├── routes.py             # Flask routes and API endpoints
+├── utils.py              # Utility functions
+├── hockey_manager.py     # Team management logic
+├── requirements.txt      # Python dependencies
+├── Procfile              # Render deployment configuration
+├── render.yaml           # Render service configuration
 ├── README.md             # This file
-├── DEPLOYMENT.md         # Deployment instructions
 ├── .gitignore           # Git ignore rules
 │
 ├── data/                 # Data storage
 │   ├── teams/           # Team JSON files
-│   │   ├── seattle_kraken.json
-│   │   └── jackalopes.json
+│   │   └── seattle_kraken.json
+│   ├── sessions/        # User session data
+│   ├── shared_lines/    # Shared line combinations
 │   └── samples/         # Sample CSV files
-│       ├── kraken_roster.csv
-│       └── sample_team.csv
 │
-└── static/              # Static assets (CSS, JS, images)
-    ├── css/
-    ├── js/
-    └── images/
+├── templates/           # HTML templates
+│   └── index.html       # Main application template
+│
+├── static/              # Static assets (CSS, JS, images)
+│   ├── css/
+│   ├── js/
+│   └── images/
+│       ├── line-walrus-logo.png
+│       └── favicon.png
+│
+└── docs/                # Documentation
+    ├── DEPLOYMENT.md
+    └── LOGO_GUIDE.md
 ```
 
 ## 🎯 Usage
@@ -83,10 +100,12 @@ skahl-line-builder/
 3. **Manual Entry**: Add players one by one
 
 ### Building Lines
-1. **Drag Players**: Drag from bench/spares to line positions
-2. **Position Flexibility**: Players can be placed in any position regardless of roster position
-3. **Real-time Updates**: Changes save automatically
-4. **Print Lines**: Generate professional line sheets
+1. **Desktop**: Drag players from bench/spares to line positions
+2. **Mobile**: Tap to select a player, then tap a position to place them
+3. **Position Flexibility**: Players can be placed in any position regardless of roster position
+4. **Real-time Updates**: Changes save automatically
+5. **Print Lines**: Generate professional line sheets
+6. **Share Lines**: Save and share specific line combinations via URL
 
 ### CSV Format
 Upload CSV files with the following format:
@@ -110,39 +129,32 @@ source .venv/bin/activate
 
 # Run in development mode
 export FLASK_ENV=development
-python app.py
+python app_simple.py
 ```
 
 ### Code Structure
-- **Flask Routes**: Handle API endpoints and web requests
-- **HockeyTeamManager**: Core team management logic
-- **Frontend**: HTML/CSS/JavaScript with drag-and-drop functionality
-- **Data Storage**: JSON files for team persistence
+- **app_simple.py**: Main Flask application entry point
+- **routes.py**: API endpoints and web request handlers
+- **hockey_manager.py**: Core team management logic
+- **utils.py**: Utility functions for file handling and data parsing
+- **config.py**: Application configuration settings
+- **templates/index.html**: Single-page application with drag-and-drop and mobile touch
+- **Data Storage**: JSON files for team persistence and session management
 
 ## 🚀 Deployment
 
-### Heroku Deployment
-1. **Create Heroku app**
-   ```bash
-   heroku create your-app-name
-   ```
+### Render Deployment (Current)
+The app is currently deployed on Render at [https://www.linewalrus.com](https://www.linewalrus.com)
 
-2. **Deploy**
-   ```bash
-   git add .
-   git commit -m "Production ready"
-   git push heroku main
-   ```
-
-3. **Open app**
-   ```bash
-   heroku open
-   ```
+1. **Automatic Deployment**: Pushes to `main` branch trigger automatic deployments
+2. **Configuration**: Uses `render.yaml` and `Procfile` for deployment settings
+3. **Environment**: Python 3.11 with Gunicorn WSGI server
 
 ### Other Platforms
-- **Render**: Use the provided `Procfile`
+- **Heroku**: Use the provided `Procfile`
 - **Railway**: Automatic Python detection
 - **DigitalOcean App Platform**: Deploy from Git repository
+- **Vercel**: Python runtime support
 
 ## 📊 API Endpoints
 
@@ -155,6 +167,8 @@ python app.py
 - `POST /api/teams/save` - Save team with custom name
 - `POST /api/teams/load` - Load saved team
 - `GET /api/teams/list` - List all saved teams
+- `POST /api/teams/update` - Update existing saved team
+- `POST /api/teams/delete` - Delete saved team
 
 ### Line Management
 - `POST /api/lines/set-player` - Place player in line position
@@ -162,6 +176,11 @@ python app.py
 - `DELETE /api/lines/clear/<line>` - Clear entire line
 - `GET /api/lines` - Get current lines
 - `GET /api/print-lines` - Generate printable line sheet
+
+### Shared Lines
+- `POST /api/shared-lines/save` - Save current lines as shareable URL
+- `GET /api/shared-lines/<id>` - Get shared line combination
+- `GET /api/shared-lines/<id>/print` - Print shared line combination
 
 ## 🤝 Contributing
 
@@ -181,7 +200,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Seattle Kraken**: Default team roster
 - **Flask Community**: Web framework
 - **Hockey Community**: Feature inspiration
+- **Render**: Hosting platform
 
 ---
 
-**Built with ❤️ for hockey coaches and team managers**# Force deployment Sun Sep 14 15:38:47 PDT 2025
+**Built with ❤️ for hockey coaches and team managers**
+
+*Line Walrus - Because Even a Walrus Can Manage Lines Better*
