@@ -130,20 +130,20 @@ def init_routes(app):
         if not is_valid:
             return jsonify({"success": False, "message": message})
         
-    # Parse CSV and load players
-    print(f"🔧 About to parse CSV content: {len(content)} characters")
-    players = parse_csv_data(content)
-    print(f"🔧 Parsed {len(players)} players from CSV")
-    manager.load_players(players)
-    
-    # Get the actual count of players loaded
-    actual_count = len(manager.players)
-    print(f"🔧 Manager now has {actual_count} players")
-    
-    return jsonify({
-        "success": True, 
-        "message": f"Team uploaded successfully! {actual_count} players loaded."
-    })
+        # Parse CSV and load players
+        print(f"🔧 About to parse CSV content: {len(content)} characters")
+        players = parse_csv_data(content)
+        print(f"🔧 Parsed {len(players)} players from CSV")
+        manager.load_players(players)
+        
+        # Get the actual count of players loaded
+        actual_count = len(manager.players)
+        print(f"🔧 Manager now has {actual_count} players")
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Team uploaded successfully! {actual_count} players loaded."
+        })
     
     @app.route('/api/teams/download')
     def download_team():
