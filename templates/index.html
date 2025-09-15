@@ -1256,18 +1256,27 @@
 
 
         async function removePlayer(playerId) {
-            const response = await fetch('/api/players/remove', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ player_id: playerId })
-            });
+            console.log(`🔍 Removing player with ID: ${playerId} (type: ${typeof playerId})`);
             
-            const result = await response.json();
-            if (result.success) {
-                loadPlayers();
-                loadLines();
-            } else {
-                alert('Error: ' + result.message);
+            try {
+                const response = await fetch('/api/players/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ player_id: playerId })
+                });
+                
+                const result = await response.json();
+                console.log('Remove player result:', result);
+                
+                if (result.success) {
+                    loadPlayers();
+                    loadLines();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error removing player:', error);
+                alert('Error removing player: ' + error.message);
             }
         }
 
@@ -1334,7 +1343,7 @@
             card.innerHTML = `
                 <div class="player-name">${player.name} ${jerseyDisplay}</div>
                 <div class="roster-position">${player.roster_position || player.position}</div>
-                <button onclick="removePlayer(${player.id})" class="remove-btn">×</button>
+                <button onclick="removePlayer('${player.id}')" class="remove-btn">×</button>
             `;
             
             card.addEventListener('dragstart', (e) => {
