@@ -20,6 +20,9 @@ class Database:
         
         # Check if we should use PostgreSQL (production)
         database_url = os.getenv('DATABASE_URL')
+        print(f"🔍 DATABASE_URL present: {database_url is not None}")
+        print(f"🔍 PSYCOPG2_AVAILABLE: {PSYCOPG2_AVAILABLE}")
+        
         if database_url and PSYCOPG2_AVAILABLE:
             self.use_postgres = True
             self.connection_string = database_url

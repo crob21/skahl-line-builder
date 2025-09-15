@@ -207,19 +207,25 @@ def init_routes(app):
         data = request.json
         team_name = data.get('team_name')
         
+        print(f"🔍 Load team request: team_name='{team_name}'")
+        print(f"🔍 Database type: {'PostgreSQL' if db.use_postgres else 'SQLite'}")
+        
         if not team_name:
             return jsonify({"success": False, "message": "No team name provided"})
         
         team_data = db.load_team(team_name)
+        print(f"🔍 Team data from database: {team_data is not None}")
         
         if team_data:
             players = team_data.get('players', [])
-            print(f"Loading {len(players)} players for team {team_name}")
+            print(f"✅ Loading {len(players)} players for team {team_name}")
             manager.load_players(players)
             manager.lines = team_data.get('lines', manager.lines)
-            print(f"Manager now has {len(manager.players)} players")
+            print(f"✅ Manager now has {len(manager.players)} players")
             return jsonify({"success": True, "message": f"Team '{team_name}' loaded successfully"})
-        return jsonify({"success": False, "message": "Team not found"})
+        else:
+            print(f"❌ Team '{team_name}' not found in database")
+            return jsonify({"success": False, "message": "Team not found"})
     
     @app.route('/api/teams/list')
     def list_teams():
