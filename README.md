@@ -96,8 +96,18 @@ line-walrus/
 
 ### Loading Teams
 1. **Default Teams**: Use "Load Saved Team" to access Seattle Kraken or Jackalopes
-2. **CSV Upload**: Upload your own team CSV file
+2. **Upload CSV**: Click "📁 Upload CSV" and select your file
 3. **Manual Entry**: Add players one by one
+
+#### CSV Upload Privacy Information
+When you upload a CSV file, only the following columns are stored in our database:
+- **First Name** - Player's first name
+- **Last Name** - Player's last name  
+- **Jersey Number** - Player's jersey number
+- **Position** - Player's position (Forward, Defense, Goalie, etc.)
+- **Affiliate** or **Affiliate Status** - Whether player is an affiliate (YES/NO)
+
+**We do NOT store**: Email addresses, phone numbers, addresses, birth dates, or any other personal information. Only basic roster information needed for line management is retained.
 
 ### Building Lines
 1. **Desktop**: Drag players from bench/spares to line positions
