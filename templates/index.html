@@ -1341,20 +1341,13 @@
                 
                 console.log('Loading lines:', lines);
                 
-                // Show team name indicator if we have players
-                const hasPlayers = Object.values(lines).some(line => 
-                    Object.values(line).some(player => player !== null)
-                );
-                
-                if (hasPlayers) {
-                    // Get current team name from the team select dropdown
-                    const teamSelect = document.getElementById('teamSelect');
-                    const selectedOption = teamSelect.options[teamSelect.selectedIndex];
-                    if (selectedOption && selectedOption.value) {
-                        const teamName = selectedOption.textContent.split(' (')[0];
-                        document.getElementById('current-team-name').textContent = teamName;
-                        document.getElementById('team-name-indicator').style.display = 'block';
-                    }
+                // Show team name indicator if we have a team loaded
+                const teamSelect = document.getElementById('teamSelect');
+                const selectedOption = teamSelect.options[teamSelect.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const teamName = selectedOption.textContent.split(' (')[0];
+                    document.getElementById('current-team-name').textContent = teamName;
+                    document.getElementById('team-name-indicator').style.display = 'block';
                 } else {
                     document.getElementById('team-name-indicator').style.display = 'none';
                 }
