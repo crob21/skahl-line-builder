@@ -21,7 +21,10 @@ class Database:
         # Check if we should use PostgreSQL (production)
         database_url = os.getenv('DATABASE_URL')
         print(f"🔍 DATABASE_URL present: {database_url is not None}")
+        if database_url:
+            print(f"🔍 DATABASE_URL value: {database_url[:50]}...")  # Show first 50 chars
         print(f"🔍 PSYCOPG2_AVAILABLE: {PSYCOPG2_AVAILABLE}")
+        print(f"🔍 All environment variables with 'DATABASE': {[k for k in os.environ.keys() if 'DATABASE' in k.upper()]}")
         
         if database_url and PSYCOPG2_AVAILABLE:
             self.use_postgres = True

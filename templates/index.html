@@ -1676,18 +1676,21 @@
 
         async function loadTeam() {
             const teamSelect = document.getElementById('teamSelect');
-            const filename = teamSelect.value;
+            const selectedOption = teamSelect.options[teamSelect.selectedIndex];
             
-            if (!filename) {
+            if (!selectedOption || !selectedOption.value) {
                 alert('Please select a team to load');
                 return;
             }
+            
+            // Get the team name from the option text (before the player count)
+            const teamName = selectedOption.textContent.split(' (')[0];
             
             try {
                 const response = await fetch('/api/teams/load', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ team_name: filename })
+                    body: JSON.stringify({ team_name: teamName })
                 });
                 
                 const result = await response.json();
