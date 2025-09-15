@@ -2067,16 +2067,24 @@
 
         // Device Detection
         function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                   window.innerWidth <= 768;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                            window.innerWidth <= 768;
+            console.log('Device detection:', {
+                userAgent: navigator.userAgent,
+                width: window.innerWidth,
+                isMobile: isMobile
+            });
+            return isMobile;
         }
 
         // Mobile Touch Handler (only for mobile devices)
         function setupMobileTouchHandler() {
             if (!isMobileDevice()) {
+                console.log('Skipping mobile touch handler - not a mobile device');
                 return; // Skip mobile setup on desktop
             }
             
+            console.log('Setting up mobile touch handler');
             let selectedPlayer = null;
             let selectedPlayerElement = null;
             
@@ -2136,10 +2144,12 @@
             
             // Add mobile-specific click handlers (only on mobile)
             document.addEventListener('click', function(e) {
+                console.log('Mobile click handler triggered:', e.target);
                 const playerCard = e.target.closest('.player-card');
                 const positionSlot = e.target.closest('.position-slot');
                 
                 if (playerCard && !playerCard.classList.contains('in-position')) {
+                    console.log('Player card clicked:', playerCard);
                     e.preventDefault();
                     e.stopPropagation();
                     selectPlayer(
@@ -2151,6 +2161,7 @@
                 }
                 
                 if (positionSlot) {
+                    console.log('Position slot clicked:', positionSlot);
                     e.preventDefault();
                     e.stopPropagation();
                     placePlayer(
