@@ -1501,16 +1501,17 @@
                 return;
             }
             
-            const lineElement = playerElement.closest('.line');
             const positionElement = playerElement.closest('.position-slot');
             
-            if (!lineElement || !positionElement) {
+            if (!positionElement) {
                 alert('Could not determine player position');
                 return;
             }
             
-            const line = lineElement.dataset.line;
+            const line = positionElement.dataset.line;
             const position = positionElement.dataset.position;
+            
+            console.log(`Removing player ${playerId} from line ${line}, position ${position}`);
             
             const response = await fetch('/api/lines/remove-player', {
                 method: 'POST',
@@ -1519,6 +1520,8 @@
             });
             
             const result = await response.json();
+            console.log('Remove player result:', result);
+            
             if (result.success) {
                 loadPlayers();
                 loadLines();
