@@ -711,6 +711,18 @@
             background: #555;
         }
 
+        .team-name-indicator {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+        }
+
         /* Mobile Optimizations */
         @media (max-width: 768px) {
             .player-card {
@@ -1088,6 +1100,9 @@
             </div>
 
             <div class="ice-rink">
+                <div id="team-name-indicator" class="team-name-indicator" style="display: none;">
+                    <span id="current-team-name">Loading...</span>
+                </div>
                 <div class="line-section">
                     <div class="line-title">Line 1</div>
                     <div class="positions">
@@ -1326,6 +1341,24 @@
                 
                 console.log('Loading lines:', lines);
                 
+                // Show team name indicator if we have players
+                const hasPlayers = Object.values(lines).some(line => 
+                    Object.values(line).some(player => player !== null)
+                );
+                
+                if (hasPlayers) {
+                    // Get current team name from the team select dropdown
+                    const teamSelect = document.getElementById('teamSelect');
+                    const selectedOption = teamSelect.options[teamSelect.selectedIndex];
+                    if (selectedOption && selectedOption.value) {
+                        const teamName = selectedOption.textContent.split(' (')[0];
+                        document.getElementById('current-team-name').textContent = teamName;
+                        document.getElementById('team-name-indicator').style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('team-name-indicator').style.display = 'none';
+                }
+                
                 // Clear all position slots
                 document.querySelectorAll('.position-slot').forEach(slot => {
                     const positionLabel = slot.querySelector('.position-label');
@@ -1357,7 +1390,7 @@
                                     <div class="${playerCardClass}" data-player-id="${player.id}" draggable="true">
                                         <div class="position-indicator">${position}</div>
                                         <div class="player-name">${player.name}</div>
-                                        <button onclick="try { console.log('Remove button clicked for player:', ${player.id}, 'Type:', typeof ${player.id}); removeFromLine(${player.id}); } catch(e) { console.error('Error in remove button click:', e); alert('Error: ' + e.message); }" class="remove-btn">×</button>
+                                        <button onclick="try { console.log('Remove button clicked for player:', '${player.id}', 'Type:', typeof '${player.id}'); removeFromLine('${player.id}'); } catch(e) { console.error('Error in remove button click:', e); alert('Error: ' + e.message); }" class="remove-btn">×</button>
                                     </div>
                                 `;
                                 
