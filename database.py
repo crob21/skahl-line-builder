@@ -4,15 +4,46 @@ import os
 from datetime import datetime
 from typing import List, Dict, Optional
 
+# Try to import PostgreSQL adapter
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    PSYCOPG2_AVAILABLE = True
+except ImportError:
+    PSYCOPG2_AVAILABLE = False
+
 class Database:
     def __init__(self, db_path: str = "data/line_walrus.db"):
         """Initialize database connection"""
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        self.db_path = db_path
+        self.use_postgres = False
+        self.connection_string = None
+        
+        # Check if we should use PostgreSQL (production)
+        database_url = os.getenv('DATABASE_URL')
+        if database_url and PSYCOPG2_AVAILABLE:
+            self.use_postgres = True
+            self.connection_string = database_url
+            print("🐘 Using PostgreSQL database")
+        else:
+            # Use SQLite for local development
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            self.db_path = db_path
+            print("📁 Using SQLite database")
+        
         self.init_database()
     
     def init_database(self):
         """Create tables if they don't exist"""
+        if self.use_postgres:
+            self._init_postgres()
+        else:
+            self._init_sqlite()
+        
+        # Auto-restore teams if database is empty
+        self._auto_restore_teams()
+    
+    def _init_sqlite(self):
+        """Initialize SQLite database"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             
@@ -52,9 +83,55 @@ class Database:
             ''')
             
             conn.commit()
-        
-        # Auto-restore teams if database is empty
-        self._auto_restore_teams()
+    
+    def _init_postgres(self):
+        """Initialize PostgreSQL database"""
+        with psycopg2.connect(self.connection_string) as conn:
+            cursor = conn.cursor()
+            
+            # Teams table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS teams (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) UNIQUE NOT NULL,
+                    filename VARCHAR(255) UNIQUE NOT NULL,
+                    players TEXT NOT NULL,  -- JSON string
+                    lines TEXT,             -- JSON string
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # Sessions table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS sessions (
+                    id VARCHAR(255) PRIMARY KEY,
+                    players TEXT,           -- JSON string
+                    lines TEXT,             -- JSON string
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # Shared lines table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS shared_lines (
+                    id VARCHAR(255) PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    players TEXT NOT NULL,  -- JSON string
+                    lines TEXT NOT NULL,    -- JSON string
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            conn.commit()
+    
+    def _get_connection(self):
+        """Get database connection (SQLite or PostgreSQL)"""
+        if self.use_postgres:
+            return psycopg2.connect(self.connection_string)
+        else:
+            return sqlite3.connect(self.db_path)
     
     def _auto_restore_teams(self):
         """Auto-restore teams from backup if database is empty"""
@@ -87,26 +164,42 @@ class Database:
     def save_team(self, name: str, filename: str, players: List[Dict], lines: Dict) -> bool:
         """Save or update a team"""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
                 
                 # Check if team exists
-                cursor.execute('SELECT id FROM teams WHERE filename = ?', (filename,))
+                if self.use_postgres:
+                    cursor.execute('SELECT id FROM teams WHERE filename = %s', (filename,))
+                else:
+                    cursor.execute('SELECT id FROM teams WHERE filename = ?', (filename,))
                 existing = cursor.fetchone()
                 
                 if existing:
                     # Update existing team
-                    cursor.execute('''
-                        UPDATE teams 
-                        SET name = ?, players = ?, lines = ?, updated_at = CURRENT_TIMESTAMP
-                        WHERE filename = ?
-                    ''', (name, json.dumps(players), json.dumps(lines), filename))
+                    if self.use_postgres:
+                        cursor.execute('''
+                            UPDATE teams 
+                            SET name = %s, players = %s, lines = %s, updated_at = CURRENT_TIMESTAMP
+                            WHERE filename = %s
+                        ''', (name, json.dumps(players), json.dumps(lines), filename))
+                    else:
+                        cursor.execute('''
+                            UPDATE teams 
+                            SET name = ?, players = ?, lines = ?, updated_at = CURRENT_TIMESTAMP
+                            WHERE filename = ?
+                        ''', (name, json.dumps(players), json.dumps(lines), filename))
                 else:
                     # Insert new team
-                    cursor.execute('''
-                        INSERT INTO teams (name, filename, players, lines)
-                        VALUES (?, ?, ?, ?)
-                    ''', (name, filename, json.dumps(players), json.dumps(lines)))
+                    if self.use_postgres:
+                        cursor.execute('''
+                            INSERT INTO teams (name, filename, players, lines)
+                            VALUES (%s, %s, %s, %s)
+                        ''', (name, filename, json.dumps(players), json.dumps(lines)))
+                    else:
+                        cursor.execute('''
+                            INSERT INTO teams (name, filename, players, lines)
+                            VALUES (?, ?, ?, ?)
+                        ''', (name, filename, json.dumps(players), json.dumps(lines)))
                 
                 conn.commit()
                 return True

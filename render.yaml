@@ -15,4 +15,4 @@ services:
 
 databases:
   - name: line-walrus-db
-    plan: free
+    plan: starter
