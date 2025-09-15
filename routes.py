@@ -284,13 +284,29 @@ def init_routes(app):
         manager = get_manager()
         data = request.json
         line_name = data.get('name', 'My Lines').strip()
+        team_name = data.get('team_name', '').strip()
         
         if not line_name:
             return jsonify({"success": False, "message": "Please provide a name for your lines"})
         
+        # Try to determine the current team name if not provided
+        if not team_name:
+            if manager.players:
+                # Check if this looks like the default Seattle Kraken roster
+                kraken_players = [p for p in manager.players if 'kraken' in p.get('name', '').lower() or 
+                                any(kraken_name in p.get('name', '').lower() for kraken_name in 
+                                    ['matty', 'beniers', 'eberle', 'schwartz', 'dunn', 'larsson'])]
+                if kraken_players:
+                    team_name = "Seattle Kraken"
+                else:
+                    team_name = "Current Team"
+            else:
+                team_name = "Current Team"
+        
         line_id = generate_line_id()
         line_data = {
             "name": line_name,
+            "team_name": team_name,
             "lines": manager.lines,
             "players": manager.players,
             "created": datetime.now().isoformat(),
@@ -327,12 +343,27 @@ def init_routes(app):
         manager = get_manager()
         current_date = datetime.now().strftime("%B %d, %Y")
         
+        # Try to determine the current team name
+        team_name = "Current Team"  # Default fallback
+        
+        # Check if we have players (like default Seattle Kraken)
+        if manager.players:
+            # Check if this looks like the default Seattle Kraken roster
+            kraken_players = [p for p in manager.players if 'kraken' in p.get('name', '').lower() or 
+                            any(kraken_name in p.get('name', '').lower() for kraken_name in 
+                                ['matty', 'beniers', 'eberle', 'schwartz', 'dunn', 'larsson'])]
+            if kraken_players:
+                team_name = "Seattle Kraken"
+            else:
+                # Try to get team name from session data or use a generic name
+                team_name = "Current Team"
+        
         # Generate print HTML
         html_content = f"""
         <!DOCTYPE html>
         <html>
         <head>
-            <title>{APP_NAME} - Lines</title>
+            <title>{APP_NAME} - {team_name} Lines</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="icon" type="image/png" href="/static/images/favicon.png">
             <style>
@@ -356,12 +387,20 @@ def init_routes(app):
                 .header p {{
                     color: #fbbf24;
                     font-style: italic;
-                    margin-bottom: 20px;
+                    margin-bottom: 10px;
                 }}
                 .header h2 {{
                     color: #3b82f6;
                     font-size: 20px;
                     margin: 0;
+                }}
+                .team-name {{
+                    color: #1e40af;
+                    font-size: 18px;
+                    font-weight: bold;
+                    margin: 10px 0;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
                 }}
                 .line-section {{ 
                     margin-bottom: 35px; 
@@ -420,6 +459,7 @@ def init_routes(app):
             <div class="header">
                 <h1>{APP_NAME}</h1>
                 <p>{APP_TAGLINE}</p>
+                <div class="team-name">{team_name}</div>
                 <h2>Game Lines - {current_date}</h2>
             </div>
         """

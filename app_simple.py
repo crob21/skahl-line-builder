@@ -252,6 +252,7 @@ def view_shared_lines(line_id):
                     </h1>
                     <p class="tagline">{APP_TAGLINE}</p>
                     <h2>{line_data['name']}</h2>
+                    <p style="color: {COLORS['gold']}; font-size: 18px; font-weight: bold; margin: 10px 0; text-transform: uppercase; letter-spacing: 1px;">{line_data.get('team_name', 'Current Team')}</p>
                     <p>Shared on {format_timestamp(line_data['created'])}</p>
                 </div>
         '''
