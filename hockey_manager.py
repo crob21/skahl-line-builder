@@ -321,22 +321,34 @@ class HockeyTeamManager:
     
     def remove_from_line(self, line, position):
         """Remove a player from a line position (new API)"""
-        line_num = int(line)
+        print(f"🔍 HockeyManager.remove_from_line called with: line={line} (type: {type(line)}), position={position} (type: {type(position)})")
+        
+        try:
+            line_num = int(line)
+            print(f"🔍 Converted line to int: {line_num}")
+        except (ValueError, TypeError) as e:
+            print(f"❌ Error converting line to int: {e}")
+            return False
+            
         if line_num not in [1, 2, 3]:
-            print("❌ Invalid line number. Use 1, 2, or 3")
+            print(f"❌ Invalid line number {line_num}. Use 1, 2, or 3")
             return False
         
         if position.upper() not in ["LW", "C", "RW", "LD", "RD", "G"]:
-            print("❌ Invalid position")
+            print(f"❌ Invalid position {position.upper()}")
             return False
+        
+        print(f"🔍 Checking if player exists at line {line_num}, position {position.upper()}")
+        print(f"🔍 Current lines: {self.lines}")
         
         if self.lines[line_num].get(position.upper()):
             self.lines[line_num][position.upper()] = None
             self.save_data()
             print(f"✅ Removed player from Line {line_num} {position.upper()}")
             return True
-        
-        return False
+        else:
+            print(f"❌ No player found at Line {line_num} {position.upper()}")
+            return False
 
 def main():
     """Main interactive menu"""

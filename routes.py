@@ -98,9 +98,15 @@ def init_routes(app):
         line = data.get('line')
         position = data.get('position')
         
+        print(f"🔍 Remove from line - Received: line={line} (type: {type(line)}), position={position} (type: {type(position)})")
+        print(f"🔍 Current lines state: {manager.lines}")
+        
         if manager.remove_from_line(line, position):
+            print(f"✅ Successfully removed player from line {line}, position {position}")
             return jsonify({"success": True, "message": "Player removed from line"})
-        return jsonify({"success": False, "message": "Failed to remove player"})
+        else:
+            print(f"❌ Failed to remove player from line {line}, position {position}")
+            return jsonify({"success": False, "message": "Failed to remove player"})
     
     @app.route('/api/lines/clear', methods=['POST'])
     def clear_line():
