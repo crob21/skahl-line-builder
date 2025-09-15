@@ -25,6 +25,10 @@ def get_session_data_file(session_id: str) -> str:
 
 def get_team_file(team_name: str) -> str:
     """Get the file path for a team's data"""
+    # If team_name already has .json extension, use it directly
+    if team_name.endswith('.json'):
+        return os.path.join(TEAMS_DIR, team_name)
+    
     # Map team names to filenames
     team_mapping = {
         "Jackalopes": "jackalopes.json",
@@ -70,7 +74,7 @@ def list_team_files() -> List[Dict]:
                 if data:
                     teams.append({
                         'filename': filename,
-                        'name': data.get('name', filename.replace('.json', '')),
+                        'name': data.get('team_name', data.get('name', filename.replace('.json', ''))),
                         'player_count': len(data.get('players', [])),
                         'last_updated': data.get('last_updated', '')
                     })
