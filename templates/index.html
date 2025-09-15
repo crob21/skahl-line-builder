@@ -1228,13 +1228,18 @@
 
 
         async function removePlayer(playerId) {
-            const response = await fetch(`/api/players/${playerId}`, {
-                method: 'DELETE'
+            const response = await fetch('/api/players/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ player_id: playerId })
             });
             
-            if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
                 loadPlayers();
                 loadLines();
+            } else {
+                alert('Error: ' + result.message);
             }
         }
 
@@ -1489,23 +1494,49 @@
         }
 
         async function removeFromLine(playerId) {
-            const response = await fetch(`/api/lines/remove-player/${playerId}`, {
-                method: 'DELETE'
+            // Find which line and position this player is in
+            const playerElement = document.querySelector(`[data-player-id="${playerId}"]`);
+            if (!playerElement) {
+                alert('Player not found in lines');
+                return;
+            }
+            
+            const lineElement = playerElement.closest('.line');
+            const positionElement = playerElement.closest('.position-slot');
+            
+            if (!lineElement || !positionElement) {
+                alert('Could not determine player position');
+                return;
+            }
+            
+            const line = lineElement.dataset.line;
+            const position = positionElement.dataset.position;
+            
+            const response = await fetch('/api/lines/remove-player', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ line: line, position: position })
             });
             
-            if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
                 loadPlayers();
                 loadLines();
+            } else {
+                alert('Error: ' + result.message);
             }
         }
 
         async function clearLine(lineNum) {
             try {
-                const response = await fetch(`/api/lines/clear/${lineNum}`, {
-                    method: 'DELETE'
+                const response = await fetch('/api/lines/clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ line: lineNum })
                 });
                 
-                if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
                     // Clear the visual display immediately
                     const lineSection = document.querySelector(`[data-line="${lineNum}"]`).closest('.line-section');
                     lineSection.querySelectorAll('.position-slot').forEach(slot => {
@@ -1522,7 +1553,7 @@
                     // Show feedback
                     showFeedback(`Line ${lineNum} cleared`, 'success');
                 } else {
-                    showFeedback('Error clearing line', 'error');
+                    showFeedback('Error: ' + result.message, 'error');
                 }
             } catch (error) {
                 console.error('Error clearing line:', error);
