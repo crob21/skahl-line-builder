@@ -1543,8 +1543,17 @@
                     return;
                 }
                 
+                // Prompt for team name
+                const teamName = prompt('Enter a name for this team:', file.name.replace('.csv', ''));
+                if (!teamName || teamName.trim() === '') {
+                    // Reset file input if no name provided
+                    e.target.value = '';
+                    return;
+                }
+                
                 const formData = new FormData();
                 formData.append('file', file);
+                formData.append('team_name', teamName.trim());
                 
                 try {
                     const response = await fetch('/api/teams/upload', {

@@ -125,6 +125,11 @@ def init_routes(app):
         if file.filename == '':
             return jsonify({"success": False, "message": "No file selected"})
         
+        # Get team name from form data
+        team_name = request.form.get('team_name', '').strip()
+        if not team_name:
+            return jsonify({"success": False, "message": "Team name is required"})
+        
         # Validate file
         content = file.read().decode('utf-8')
         is_valid, message = validate_file_upload(file.filename, content)
@@ -135,13 +140,19 @@ def init_routes(app):
         players = parse_csv_data(content)
         manager.load_players(players)
         
-        # Get the actual count of players loaded
-        actual_count = len(manager.players)
-        
-        return jsonify({
-            "success": True, 
-            "message": f"Team uploaded successfully! {actual_count} players loaded."
-        })
+        # Save the team with the provided name
+        filename = f"{team_name.lower().replace(' ', '_')}.json"
+        if db.save_team(team_name, filename, manager.players, manager.lines):
+            actual_count = len(manager.players)
+            return jsonify({
+                "success": True, 
+                "message": f"Team '{team_name}' uploaded and saved successfully! {actual_count} players loaded."
+            })
+        else:
+            return jsonify({
+                "success": False, 
+                "message": f"Failed to save team '{team_name}'. Team may already exist."
+            })
     
     @app.route('/api/teams/download')
     def download_team():
