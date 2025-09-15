@@ -2058,10 +2058,118 @@
             }, { passive: true });
         }
 
+        // Mobile Touch Fix Function
+        function fixMobileTouchInteractions() {
+            console.log('🦭 Applying mobile touch fix...');
+            let selectedPlayer = null;
+            let selectedPlayerElement = null;
+            
+            function selectPlayer(playerId, playerName, element) {
+                console.log('📱 Selecting player:', playerName);
+                // Deselect previous player
+                if (selectedPlayerElement) {
+                    selectedPlayerElement.classList.remove('selected');
+                }
+                
+                // Select new player
+                selectedPlayer = {
+                    id: playerId,
+                    name: playerName
+                };
+                selectedPlayerElement = element;
+                element.classList.add('selected');
+                
+                // Show visual feedback
+                element.style.transform = 'scale(1.05)';
+                element.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.5)';
+            }
+            
+            function placePlayerInPosition(line, position, slot) {
+                if (!selectedPlayer) {
+                    console.log('❌ No player selected');
+                    return;
+                }
+                
+                console.log('📱 Placing player in line', line, position);
+                
+                // Call the API to place the player
+                fetch('/api/lines/set-player', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        player_id: selectedPlayer.id,
+                        line_num: line,
+                        position: position
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        console.log('✅ Player placed successfully');
+                        loadLines();
+                        loadPlayers();
+                    } else {
+                        console.log('❌ Failed to place player:', result.message);
+                    }
+                })
+                .catch(error => {
+                    console.log('❌ Error placing player:', error);
+                });
+                
+                // Clear selection
+                clearSelection();
+            }
+            
+            function clearSelection() {
+                if (selectedPlayerElement) {
+                    selectedPlayerElement.classList.remove('selected');
+                    selectedPlayerElement.style.transform = '';
+                    selectedPlayerElement.style.boxShadow = '';
+                }
+                selectedPlayer = null;
+                selectedPlayerElement = null;
+            }
+            
+            // Add click event listeners for mobile
+            document.addEventListener('click', function(e) {
+                const playerCard = e.target.closest('.player-card');
+                const positionSlot = e.target.closest('.position-slot');
+                
+                if (playerCard && !playerCard.classList.contains('in-position')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    selectPlayer(
+                        parseInt(playerCard.dataset.playerId),
+                        playerCard.querySelector('.player-name').textContent,
+                        playerCard
+                    );
+                }
+                
+                if (positionSlot) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    placePlayerInPosition(
+                        positionSlot.dataset.line,
+                        positionSlot.dataset.position,
+                        positionSlot
+                    );
+                }
+            });
+            
+            console.log('✅ Mobile touch fix applied successfully!');
+            console.log('📱 Touch interactions should now work on mobile devices');
+        }
+
                     // Initialize all functionality when page loads
             document.addEventListener('DOMContentLoaded', function() {
                 setupMobileTouch();
                 setupMobilePlayerPlacement();
+                
+                // Apply mobile touch fix after a delay
+                setTimeout(function() {
+                    console.log('🔧 Applying mobile touch fix...');
+                    fixMobileTouchInteractions();
+                }, 2000);
             });
     </script>
 </body>
