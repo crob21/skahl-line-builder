@@ -82,8 +82,11 @@ def parse_csv_data(csv_content: str) -> List[Dict]:
     """Parse CSV content into player data"""
     players = []
     try:
+        print(f"🔧 CSV Content length: {len(csv_content)}")
         csv_reader = csv.DictReader(csv_content.splitlines())
+        print(f"🔧 CSV Headers: {csv_reader.fieldnames}")
         for row in csv_reader:
+            print(f"🔧 Processing row: {row}")
             # Handle different column names for affiliate status
             affiliate_value = row.get('Affiliate', '') or row.get('Affiliate Status', '')
             
