@@ -44,6 +44,17 @@ class Database:
             self.use_postgres = True
             self.connection_string = database_url
             print("🐘 Using PostgreSQL database")
+            print(f"🔍 Connection string format: {database_url[:20]}...{database_url[-20:] if len(database_url) > 40 else database_url}")
+            
+            # Validate connection string format
+            if not database_url.startswith(('postgresql://', 'postgres://')):
+                print(f"⚠️  Warning: DATABASE_URL doesn't look like a valid PostgreSQL connection string")
+                print(f"🔍 Expected format: postgresql://user:password@host:port/database")
+                print(f"🔍 Got: {database_url}")
+                print(f"🔄 Falling back to SQLite database")
+                self.use_postgres = False
+                os.makedirs(os.path.dirname(db_path), exist_ok=True)
+                self.db_path = db_path
         else:
             # Use SQLite for local development
             os.makedirs(os.path.dirname(db_path), exist_ok=True)
