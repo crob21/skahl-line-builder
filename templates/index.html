@@ -2058,41 +2058,42 @@
             }, { passive: true });
         }
 
-        // Mobile Touch Fix Function
+        // Simple Mobile Touch Fix
         function fixMobileTouchInteractions() {
-            console.log('🦭 Applying mobile touch fix...');
+            console.log('🦭 Applying SIMPLE mobile touch fix...');
+            
+            // Remove all existing event listeners by cloning and replacing the body
+            const newBody = document.body.cloneNode(true);
+            document.body.parentNode.replaceChild(newBody, document.body);
+            
             let selectedPlayer = null;
             let selectedPlayerElement = null;
             
             function selectPlayer(playerId, playerName, element) {
                 console.log('📱 Selecting player:', playerName);
-                // Deselect previous player
+                
+                // Clear previous selection
                 if (selectedPlayerElement) {
-                    selectedPlayerElement.classList.remove('selected');
+                    selectedPlayerElement.style.background = '';
+                    selectedPlayerElement.style.border = '';
                 }
                 
                 // Select new player
-                selectedPlayer = {
-                    id: playerId,
-                    name: playerName
-                };
+                selectedPlayer = { id: playerId, name: playerName };
                 selectedPlayerElement = element;
-                element.classList.add('selected');
-                
-                // Show visual feedback
-                element.style.transform = 'scale(1.05)';
-                element.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.5)';
+                element.style.background = '#3b82f6';
+                element.style.border = '3px solid #1d4ed8';
+                element.style.color = 'white';
             }
             
-            function placePlayerInPosition(line, position, slot) {
+            function placePlayer(line, position) {
                 if (!selectedPlayer) {
-                    console.log('❌ No player selected');
+                    alert('Please select a player first');
                     return;
                 }
                 
-                console.log('📱 Placing player in line', line, position);
+                console.log('📱 Placing', selectedPlayer.name, 'in line', line, position);
                 
-                // Call the API to place the player
                 fetch('/api/lines/set-player', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -2108,30 +2109,28 @@
                         console.log('✅ Player placed successfully');
                         loadLines();
                         loadPlayers();
+                        // Clear selection
+                        if (selectedPlayerElement) {
+                            selectedPlayerElement.style.background = '';
+                            selectedPlayerElement.style.border = '';
+                            selectedPlayerElement.style.color = '';
+                        }
+                        selectedPlayer = null;
+                        selectedPlayerElement = null;
                     } else {
-                        console.log('❌ Failed to place player:', result.message);
+                        alert('Failed to place player: ' + result.message);
                     }
                 })
                 .catch(error => {
-                    console.log('❌ Error placing player:', error);
+                    console.error('Error:', error);
+                    alert('Error placing player');
                 });
-                
-                // Clear selection
-                clearSelection();
             }
             
-            function clearSelection() {
-                if (selectedPlayerElement) {
-                    selectedPlayerElement.classList.remove('selected');
-                    selectedPlayerElement.style.transform = '';
-                    selectedPlayerElement.style.boxShadow = '';
-                }
-                selectedPlayer = null;
-                selectedPlayerElement = null;
-            }
-            
-            // Add click event listeners for mobile
+            // Add simple click handlers
             document.addEventListener('click', function(e) {
+                console.log('📱 Click detected on:', e.target);
+                
                 const playerCard = e.target.closest('.player-card');
                 const positionSlot = e.target.closest('.position-slot');
                 
@@ -2143,33 +2142,33 @@
                         playerCard.querySelector('.player-name').textContent,
                         playerCard
                     );
+                    return;
                 }
                 
                 if (positionSlot) {
                     e.preventDefault();
                     e.stopPropagation();
-                    placePlayerInPosition(
+                    placePlayer(
                         positionSlot.dataset.line,
-                        positionSlot.dataset.position,
-                        positionSlot
+                        positionSlot.dataset.position
                     );
+                    return;
                 }
             });
             
-            console.log('✅ Mobile touch fix applied successfully!');
-            console.log('📱 Touch interactions should now work on mobile devices');
+            console.log('✅ Simple mobile touch fix applied!');
         }
 
                     // Initialize all functionality when page loads
             document.addEventListener('DOMContentLoaded', function() {
+                // Only setup basic mobile touch, skip the complex handlers
                 setupMobileTouch();
-                setupMobilePlayerPlacement();
                 
-                // Apply mobile touch fix after a delay
+                // Apply simple mobile touch fix after a delay
                 setTimeout(function() {
-                    console.log('🔧 Applying mobile touch fix...');
+                    console.log('🔧 Applying SIMPLE mobile touch fix...');
                     fixMobileTouchInteractions();
-                }, 2000);
+                }, 3000);
             });
     </script>
 </body>
