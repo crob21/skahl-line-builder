@@ -691,7 +691,7 @@
             cursor: pointer;
             font-size: 11px;
             padding: 0;
-            display: block; /* Always visible for debugging */
+            display: none; /* Hidden by default */
             z-index: 10;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
@@ -1357,7 +1357,7 @@
                                     <div class="${playerCardClass}" data-player-id="${player.id}" draggable="true">
                                         <div class="position-indicator">${position}</div>
                                         <div class="player-name">${player.name}</div>
-                                        <button onclick="console.log('Remove button clicked for player:', ${player.id}); removeFromLine(${player.id})" class="remove-btn">×</button>
+                                        <button onclick="try { console.log('Remove button clicked for player:', ${player.id}); removeFromLine(${player.id}); } catch(e) { console.error('Error in remove button click:', e); alert('Error: ' + e.message); }" class="remove-btn">×</button>
                                     </div>
                                 `;
                                 
