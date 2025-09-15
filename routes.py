@@ -173,7 +173,7 @@ def init_routes(app):
         """Save current team"""
         manager = get_manager()
         data = request.json
-        team_name = data.get('name', 'My Team').strip()
+        team_name = data.get('team_name', data.get('name', 'My Team')).strip()
         
         if not team_name:
             return jsonify({"success": False, "message": "Please provide a team name"})
