@@ -52,6 +52,37 @@ class Database:
             ''')
             
             conn.commit()
+        
+        # Auto-restore teams if database is empty
+        self._auto_restore_teams()
+    
+    def _auto_restore_teams(self):
+        """Auto-restore teams from backup if database is empty"""
+        try:
+            # Check if we have any teams
+            teams = self.list_teams()
+            if len(teams) > 0:
+                return  # Database already has teams
+            
+            # Check if backup file exists
+            backup_file = 'data/teams_backup.json'
+            if not os.path.exists(backup_file):
+                return  # No backup to restore
+            
+            # Restore from backup
+            with open(backup_file, 'r') as f:
+                backup_data = json.load(f)
+            
+            restored_count = 0
+            for team in backup_data:
+                if self.save_team(team['name'], team['filename'], team['players'], team['lines']):
+                    restored_count += 1
+            
+            if restored_count > 0:
+                print(f"🔄 Auto-restored {restored_count} teams from backup")
+                
+        except Exception as e:
+            print(f"⚠️ Auto-restore failed: {e}")
     
     def save_team(self, name: str, filename: str, players: List[Dict], lines: Dict) -> bool:
         """Save or update a team"""
