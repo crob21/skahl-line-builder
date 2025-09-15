@@ -2311,6 +2311,7 @@
             let selectedPlayerElement = null;
             
             function selectPlayer(playerId, playerName, element) {
+                console.log('Selecting player:', playerName, 'ID:', playerId);
                 // Clear previous selection
                 if (selectedPlayerElement) {
                     selectedPlayerElement.style.background = '';
@@ -2324,9 +2325,11 @@
                 element.style.background = '#3b82f6';
                 element.style.border = '3px solid #1d4ed8';
                 element.style.color = 'white';
+                console.log('Player selected:', selectedPlayer);
             }
             
             function placePlayer(line, position) {
+                console.log('Attempting to place player:', selectedPlayer, 'in line:', line, 'position:', position);
                 if (!selectedPlayer) {
                     alert('Please select a player first');
                     return;
@@ -2343,6 +2346,7 @@
                 })
                 .then(response => response.json())
                 .then(result => {
+                    console.log('Place player result:', result);
                     if (result.success) {
                         loadLines();
                         loadPlayers();
@@ -2354,19 +2358,20 @@
                         }
                         selectedPlayer = null;
                         selectedPlayerElement = null;
+                        console.log('Player placed successfully');
                     } else {
                         alert('Failed to place player: ' + result.message);
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('Error placing player:', error);
                     alert('Error placing player');
                 });
             }
             
-            // Add mobile-specific click handlers (only on mobile)
+            // Add mobile-specific click handlers with higher priority
             document.addEventListener('click', function(e) {
-                console.log('Mobile click handler triggered:', e.target);
+                console.log('Mobile click detected on:', e.target);
                 const playerCard = e.target.closest('.player-card');
                 const positionSlot = e.target.closest('.position-slot');
                 
@@ -2374,25 +2379,27 @@
                     console.log('Player card clicked:', playerCard);
                     e.preventDefault();
                     e.stopPropagation();
-                    selectPlayer(
-                        parseInt(playerCard.dataset.playerId),
-                        playerCard.querySelector('.player-name').textContent,
-                        playerCard
-                    );
-                    return;
+                    e.stopImmediatePropagation();
+                    
+                    const playerId = parseInt(playerCard.dataset.playerId);
+                    const playerName = playerCard.querySelector('.player-name').textContent;
+                    selectPlayer(playerId, playerName, playerCard);
+                    return false;
                 }
                 
                 if (positionSlot) {
                     console.log('Position slot clicked:', positionSlot);
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
                     placePlayer(
                         positionSlot.dataset.line,
                         positionSlot.dataset.position
                     );
-                    return;
+                    return false;
                 }
-            });
+            }, true); // Use capture phase for higher priority
         }
 
         // Initialize all functionality when page loads
