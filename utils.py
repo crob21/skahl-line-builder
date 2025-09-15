@@ -108,7 +108,7 @@ def parse_csv_data(csv_content: str) -> List[Dict]:
             
             player = {
                 'id': f"player_{len(players) + 1}",
-                'name': f"{row.get('Last Name', '')} {row.get('First Name', '')}".strip(),
+                'name': f"{row.get('First Name', '')} {row.get('Last Name', '')}".strip(),
                 'jersey': row.get('Jersey Number', ''),
                 'roster_position': roster_position,
                 'affiliate': affiliate_value.upper() == 'YES',

@@ -45,8 +45,8 @@ def init_routes(app):
         player = {
             'id': f"player_{len(manager.players) + 1}",
             'name': data.get('name', '').strip(),
-            'jersey': data.get('jersey', '').strip(),
-            'roster_position': data.get('roster_position', 'FORWARD'),
+            'jersey': data.get('jersey_number', data.get('jersey', '')).strip(),
+            'roster_position': data.get('position', data.get('roster_position', 'FORWARD')),
             'affiliate': data.get('affiliate', False),
             'location': 'spares' if data.get('affiliate', False) else 'bench'
         }
