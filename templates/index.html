@@ -1357,7 +1357,7 @@
                                     <div class="${playerCardClass}" data-player-id="${player.id}" draggable="true">
                                         <div class="position-indicator">${position}</div>
                                         <div class="player-name">${player.name}</div>
-                                        <button onclick="try { console.log('Remove button clicked for player:', ${player.id}); removeFromLine(${player.id}); } catch(e) { console.error('Error in remove button click:', e); alert('Error: ' + e.message); }" class="remove-btn">×</button>
+                                        <button onclick="try { console.log('Remove button clicked for player:', ${player.id}, 'Type:', typeof ${player.id}); removeFromLine(${player.id}); } catch(e) { console.error('Error in remove button click:', e); alert('Error: ' + e.message); }" class="remove-btn">×</button>
                                     </div>
                                 `;
                                 
@@ -1496,9 +1496,15 @@
         }
 
         async function removeFromLine(playerId) {
+            console.log(`🔍 Looking for player with ID: ${playerId} (type: ${typeof playerId})`);
+            
             // Find which line and position this player is in
             const playerElement = document.querySelector(`[data-player-id="${playerId}"]`);
+            console.log(`🔍 Player element found:`, playerElement);
+            
             if (!playerElement) {
+                console.log(`❌ Player not found in lines. Available player IDs:`, 
+                    Array.from(document.querySelectorAll('[data-player-id]')).map(el => el.dataset.playerId));
                 alert('Player not found in lines');
                 return;
             }
