@@ -624,6 +624,17 @@
             background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
         }
 
+        /* Goalies should keep their gold color even when in position */
+        .spare-player.goalie.in-position {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+            border: 2px solid #d97706 !important;
+            color: #333 !important;
+        }
+        
+        .spare-player.goalie.in-position:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+        }
+
         .player-card.goalie .position-indicator {
             background: #333;
             color: #fbbf24;
