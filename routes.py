@@ -13,6 +13,7 @@ from utils import (
     get_team_file, get_shared_line_file, load_json_file, save_json_file,
     list_team_files, parse_csv_data, validate_file_upload, format_timestamp
 )
+from database import db
 from config import APP_NAME, APP_TAGLINE
 
 def get_manager():
@@ -175,15 +176,10 @@ def init_routes(app):
         if not team_name:
             return jsonify({"success": False, "message": "Please provide a team name"})
         
-        team_data = {
-            "name": team_name,
-            "players": manager.players,
-            "lines": manager.lines,
-            "last_updated": datetime.now().isoformat()
-        }
+        # Generate filename from team name
+        filename = f"{team_name.lower().replace(' ', '_')}.json"
         
-        team_file = get_team_file(team_name)
-        if save_json_file(team_file, team_data):
+        if db.save_team(team_name, filename, manager.players, manager.lines):
             return jsonify({"success": True, "message": f"Team '{team_name}' saved successfully"})
         return jsonify({"success": False, "message": "Failed to save team"})
     
@@ -197,8 +193,7 @@ def init_routes(app):
         if not team_name:
             return jsonify({"success": False, "message": "No team name provided"})
         
-        team_file = get_team_file(team_name)
-        team_data = load_json_file(team_file)
+        team_data = db.load_team(team_name)
         
         if team_data:
             players = team_data.get('players', [])
@@ -212,7 +207,7 @@ def init_routes(app):
     @app.route('/api/teams/list')
     def list_teams():
         """List all available teams"""
-        teams = list_team_files()
+        teams = db.list_teams()
         return jsonify(teams)
     
     @app.route('/api/teams/delete', methods=['POST'])
@@ -224,14 +219,9 @@ def init_routes(app):
         if not team_name:
             return jsonify({"success": False, "message": "Team name required"})
         
-        team_file = f"data/teams/{team_name}.json"
-        if os.path.exists(team_file):
-            try:
-                os.remove(team_file)
-                print(f"🗑️ Deleted team: {team_name}")
-                return jsonify({"success": True, "message": f"Team '{team_name}' deleted successfully"})
-            except Exception as e:
-                return jsonify({"success": False, "message": f"Error deleting team: {str(e)}"})
+        if db.delete_team(team_name):
+            print(f"🗑️ Deleted team: {team_name}")
+            return jsonify({"success": True, "message": f"Team '{team_name}' deleted successfully"})
         else:
             return jsonify({"success": False, "message": "Team not found"})
     
@@ -246,26 +236,14 @@ def init_routes(app):
         
         manager = get_manager()
         
-        # Create team data with current roster and lines
-        team_data = {
-            "name": team_name,
-            "players": manager.players,
-            "lines": manager.lines,
-            "created": datetime.now().isoformat(),
-            "updated": datetime.now().isoformat()
-        }
+        # Generate filename from team name
+        filename = f"{team_name.lower().replace(' ', '_')}.json"
         
-        # Save to file
-        team_file = f"data/teams/{team_name}.json"
-        try:
-            os.makedirs(os.path.dirname(team_file), exist_ok=True)
-            with open(team_file, 'w') as f:
-                json.dump(team_data, f, indent=2)
-            
+        if db.save_team(team_name, filename, manager.players, manager.lines):
             print(f"🔄 Updated team: {team_name} with {len(manager.players)} players")
             return jsonify({"success": True, "message": f"Team '{team_name}' updated successfully"})
-        except Exception as e:
-            return jsonify({"success": False, "message": f"Error updating team: {str(e)}"})
+        else:
+            return jsonify({"success": False, "message": f"Error updating team"})
     
     @app.route('/api/lines/save', methods=['POST'])
     def save_lines():
