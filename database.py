@@ -1,5 +1,5 @@
 import sqlite3
-import json
+import json 
 import os
 from datetime import datetime
 from typing import List, Dict, Optional
@@ -207,19 +207,23 @@ class Database:
             print(f"Error saving team: {e}")
             return False
     
-    def load_team(self, filename: str) -> Optional[Dict]:
-        """Load a team by filename"""
+    def load_team(self, team_name: str) -> Optional[Dict]:
+        """Load a team by name"""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('SELECT name, players, lines FROM teams WHERE filename = ?', (filename,))
+                if self.use_postgres:
+                    cursor.execute('SELECT name, filename, players, lines FROM teams WHERE name = %s', (team_name,))
+                else:
+                    cursor.execute('SELECT name, filename, players, lines FROM teams WHERE name = ?', (team_name,))
                 row = cursor.fetchone()
                 
                 if row:
                     return {
                         'name': row[0],
-                        'players': json.loads(row[1]),
-                        'lines': json.loads(row[2]) if row[2] else {}
+                        'filename': row[1],
+                        'players': json.loads(row[2]),
+                        'lines': json.loads(row[3]) if row[3] else {}
                     }
                 return None
         except Exception as e:
@@ -269,26 +273,42 @@ class Database:
     def save_session(self, session_id: str, players: List[Dict], lines: Dict) -> bool:
         """Save session data"""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
                 
                 # Check if session exists
-                cursor.execute('SELECT id FROM sessions WHERE id = ?', (session_id,))
+                if self.use_postgres:
+                    cursor.execute('SELECT id FROM sessions WHERE id = %s', (session_id,))
+                else:
+                    cursor.execute('SELECT id FROM sessions WHERE id = ?', (session_id,))
                 existing = cursor.fetchone()
                 
                 if existing:
                     # Update existing session
-                    cursor.execute('''
-                        UPDATE sessions 
-                        SET players = ?, lines = ?, updated_at = CURRENT_TIMESTAMP
-                        WHERE id = ?
-                    ''', (json.dumps(players), json.dumps(lines), session_id))
+                    if self.use_postgres:
+                        cursor.execute('''
+                            UPDATE sessions 
+                            SET players = %s, lines = %s, updated_at = CURRENT_TIMESTAMP
+                            WHERE id = %s
+                        ''', (json.dumps(players), json.dumps(lines), session_id))
+                    else:
+                        cursor.execute('''
+                            UPDATE sessions 
+                            SET players = ?, lines = ?, updated_at = CURRENT_TIMESTAMP
+                            WHERE id = ?
+                        ''', (json.dumps(players), json.dumps(lines), session_id))
                 else:
                     # Insert new session
-                    cursor.execute('''
-                        INSERT INTO sessions (id, players, lines)
-                        VALUES (?, ?, ?)
-                    ''', (session_id, json.dumps(players), json.dumps(lines)))
+                    if self.use_postgres:
+                        cursor.execute('''
+                            INSERT INTO sessions (id, players, lines)
+                            VALUES (%s, %s, %s)
+                        ''', (session_id, json.dumps(players), json.dumps(lines)))
+                    else:
+                        cursor.execute('''
+                            INSERT INTO sessions (id, players, lines)
+                            VALUES (?, ?, ?)
+                        ''', (session_id, json.dumps(players), json.dumps(lines)))
                 
                 conn.commit()
                 return True
@@ -299,9 +319,12 @@ class Database:
     def load_session(self, session_id: str) -> Optional[Dict]:
         """Load session data"""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('SELECT players, lines FROM sessions WHERE id = ?', (session_id,))
+                if self.use_postgres:
+                    cursor.execute('SELECT players, lines FROM sessions WHERE id = %s', (session_id,))
+                else:
+                    cursor.execute('SELECT players, lines FROM sessions WHERE id = ?', (session_id,))
                 row = cursor.fetchone()
                 
                 if row:
@@ -317,12 +340,22 @@ class Database:
     def save_shared_lines(self, line_id: str, name: str, players: List[Dict], lines: Dict) -> bool:
         """Save shared lines"""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
-                    INSERT OR REPLACE INTO shared_lines (id, name, players, lines)
-                    VALUES (?, ?, ?, ?)
-                ''', (line_id, name, json.dumps(players), json.dumps(lines)))
+                if self.use_postgres:
+                    cursor.execute('''
+                        INSERT INTO shared_lines (id, name, players, lines)
+                        VALUES (%s, %s, %s, %s)
+                        ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        players = EXCLUDED.players,
+                        lines = EXCLUDED.lines
+                    ''', (line_id, name, json.dumps(players), json.dumps(lines)))
+                else:
+                    cursor.execute('''
+                        INSERT OR REPLACE INTO shared_lines (id, name, players, lines)
+                        VALUES (?, ?, ?, ?)
+                    ''', (line_id, name, json.dumps(players), json.dumps(lines)))
                 conn.commit()
                 return True
         except Exception as e:
@@ -332,9 +365,12 @@ class Database:
     def load_shared_lines(self, line_id: str) -> Optional[Dict]:
         """Load shared lines"""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('SELECT name, players, lines FROM shared_lines WHERE id = ?', (line_id,))
+                if self.use_postgres:
+                    cursor.execute('SELECT name, players, lines FROM shared_lines WHERE id = %s', (line_id,))
+                else:
+                    cursor.execute('SELECT name, players, lines FROM shared_lines WHERE id = ?', (line_id,))
                 row = cursor.fetchone()
                 
                 if row:
