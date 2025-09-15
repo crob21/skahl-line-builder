@@ -1734,15 +1734,15 @@
 
         async function deleteTeam() {
             const teamSelect = document.getElementById('teamSelect');
-            const filename = teamSelect.value;
+            const selectedOption = teamSelect.options[teamSelect.selectedIndex];
             
-            if (!filename) {
+            if (!selectedOption || !selectedOption.value) {
                 alert('Please select a team to delete');
                 return;
             }
             
-            // Extract team name from filename (remove .json extension)
-            const teamName = filename.replace('.json', '');
+            // Get the team name from the option text (before the player count)
+            const teamName = selectedOption.textContent.split(' (')[0];
             
             if (!confirm(`Are you sure you want to delete team "${teamName}"? This action cannot be undone.`)) {
                 return;

@@ -229,9 +229,12 @@ class Database:
     def list_teams(self) -> List[Dict]:
         """List all teams"""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('SELECT name, filename, players, updated_at FROM teams ORDER BY updated_at DESC')
+                if self.use_postgres:
+                    cursor.execute('SELECT name, filename, players, updated_at FROM teams ORDER BY updated_at DESC')
+                else:
+                    cursor.execute('SELECT name, filename, players, updated_at FROM teams ORDER BY updated_at DESC')
                 rows = cursor.fetchall()
                 
                 teams = []
@@ -248,12 +251,15 @@ class Database:
             print(f"Error listing teams: {e}")
             return []
     
-    def delete_team(self, filename: str) -> bool:
-        """Delete a team"""
+    def delete_team(self, team_name: str) -> bool:
+        """Delete a team by name"""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('DELETE FROM teams WHERE filename = ?', (filename,))
+                if self.use_postgres:
+                    cursor.execute('DELETE FROM teams WHERE name = %s', (team_name,))
+                else:
+                    cursor.execute('DELETE FROM teams WHERE name = ?', (team_name,))
                 conn.commit()
                 return cursor.rowcount > 0
         except Exception as e:
