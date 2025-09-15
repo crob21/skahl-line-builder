@@ -16,6 +16,14 @@ except ImportError as e:
     print(f"❌ psycopg2 import failed: {e}")
     print(f"🔍 Python path: {sys.path}")
     print(f"🔍 Installed packages: {[p for p in sys.modules.keys() if 'psycopg' in p]}")
+    
+    # Try to check if psycopg2 is installed via pip
+    try:
+        import subprocess
+        result = subprocess.run(['pip', 'list'], capture_output=True, text=True)
+        print(f"🔍 Pip list output: {result.stdout}")
+    except Exception as pip_error:
+        print(f"🔍 Could not run pip list: {pip_error}")
 
 class Database:
     def __init__(self, db_path: str = "data/line_walrus.db"):
