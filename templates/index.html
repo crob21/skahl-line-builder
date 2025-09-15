@@ -1514,11 +1514,13 @@
             const position = positionElement.dataset.position;
             
             console.log(`Removing player ${playerId} from line ${line}, position ${position}`);
+            console.log('Position element:', positionElement);
+            console.log('Line dataset:', positionElement.dataset);
             
             const response = await fetch('/api/lines/remove-player', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ line: line, position: position })
+                body: JSON.stringify({ line: parseInt(line), position: position })
             });
             
             const result = await response.json();
