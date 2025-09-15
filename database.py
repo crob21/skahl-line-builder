@@ -25,6 +25,7 @@ class Database:
             print(f"🔍 DATABASE_URL value: {database_url[:50]}...")  # Show first 50 chars
         print(f"🔍 PSYCOPG2_AVAILABLE: {PSYCOPG2_AVAILABLE}")
         print(f"🔍 All environment variables with 'DATABASE': {[k for k in os.environ.keys() if 'DATABASE' in k.upper()]}")
+        print(f"🔍 All environment variables: {list(os.environ.keys())}")
         
         if database_url and PSYCOPG2_AVAILABLE:
             self.use_postgres = True
@@ -35,6 +36,10 @@ class Database:
             os.makedirs(os.path.dirname(db_path), exist_ok=True)
             self.db_path = db_path
             print("📁 Using SQLite database")
+            if database_url and not PSYCOPG2_AVAILABLE:
+                print("⚠️  DATABASE_URL found but psycopg2 not available - using SQLite")
+            elif not database_url:
+                print("⚠️  No DATABASE_URL found - using SQLite")
         
         self.init_database()
     
