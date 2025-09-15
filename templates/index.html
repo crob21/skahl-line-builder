@@ -361,14 +361,6 @@
             transform: translateY(-1px);
         }
 
-        .btn-update {
-            background: #f59e0b;
-        }
-
-        .btn-update:hover {
-            background: #d97706;
-            transform: translateY(-1px);
-        }
 
         /* Responsive design for smaller screens */
         @media (max-width: 768px) {
@@ -1104,10 +1096,9 @@
                         Affiliate Player
                     </label>
                     <button onclick="addPlayer()">Add Player</button>
-                    <button onclick="updateCurrentTeam()" class="btn-update">Update Team</button>
                 </div>
                 <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 5px; font-style: italic;">
-                    💡 After adding players, click "Update Team" to save changes to the database
+                    💡 Players are automatically saved to the selected team
                 </div>
             </div>
         </div>
@@ -1245,6 +1236,12 @@
                 return;
             }
             
+            // Get current team name if one is selected
+            const teamSelect = document.getElementById('teamSelect');
+            const selectedOption = teamSelect.options[teamSelect.selectedIndex];
+            const teamName = selectedOption && selectedOption.value ? 
+                selectedOption.textContent.split(' (')[0] : null;
+            
             const response = await fetch('/api/players/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1252,7 +1249,8 @@
                     name, 
                     position, 
                     jersey_number: jerseyNumber,
-                    affiliate: isAffiliate
+                    affiliate: isAffiliate,
+                    team_name: teamName
                 })
             });
             
@@ -1263,41 +1261,14 @@
                 document.getElementById('jerseyNumber').value = '';
                 document.getElementById('isAffiliate').checked = false;
                 loadPlayers();
+                if (teamName) {
+                    loadTeamList(); // Refresh team list to show updated player count
+                }
             } else {
                 alert(result.message);
             }
         }
 
-        async function updateCurrentTeam() {
-            const teamSelect = document.getElementById('teamSelect');
-            const selectedOption = teamSelect.options[teamSelect.selectedIndex];
-            
-            if (!selectedOption || !selectedOption.value) {
-                alert('Please select a team to update');
-                return;
-            }
-            
-            const teamName = selectedOption.textContent.split(' (')[0];
-            
-            try {
-                const response = await fetch('/api/teams/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ team_name: teamName })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    alert(`Team "${teamName}" updated successfully!`);
-                    loadTeamList(); // Refresh the team list to show updated player count
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            } catch (error) {
-                alert('Error updating team: ' + error.message);
-            }
-        }
 
 
 

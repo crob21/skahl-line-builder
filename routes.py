@@ -39,7 +39,7 @@ def init_routes(app):
     
     @app.route('/api/players/add', methods=['POST'])
     def add_player():
-        """Add a new player"""
+        """Add a new player and automatically save to database"""
         manager = get_manager()
         data = request.json
         
@@ -53,7 +53,17 @@ def init_routes(app):
         }
         
         manager.add_player(player)
-        return jsonify({"success": True, "message": "Player added successfully"})
+        
+        # Automatically save to database if a team is selected
+        team_name = data.get('team_name')
+        if team_name:
+            filename = f"{team_name.lower().replace(' ', '_')}.json"
+            if db.save_team(team_name, filename, manager.players, manager.lines):
+                return jsonify({"success": True, "message": f"Player added and team '{team_name}' updated successfully"})
+            else:
+                return jsonify({"success": True, "message": "Player added to session (team update failed)"})
+        else:
+            return jsonify({"success": True, "message": "Player added to session"})
     
     @app.route('/api/players/remove', methods=['POST'])
     def remove_player():
