@@ -130,6 +130,64 @@
             background: #5a6268;
         }
         
+        .line-actions {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .line-actions h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+        
+        .line-action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-print {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn-print:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-share {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn-share:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
         .logo {
             width: 80px;
             height: 80px;
@@ -1010,8 +1068,6 @@
                         Affiliate Player
                     </label>
                     <button onclick="addPlayer()">Add Player</button>
-                    <button onclick="printLines()" style="background: #dc3545;">🖨️ Print Lines</button>
-                    <button onclick="saveAndShareLines()" style="background: #28a745;">🔗 Save & Share Lines</button>
                 </div>
             </div>
         </div>
@@ -1108,6 +1164,19 @@
                 </div>
             </div>
         </div>
+        
+        <div class="controls">
+            <div class="line-actions">
+                <h3>🖨️ Print & Share</h3>
+                <div class="line-action-buttons">
+                    <button onclick="printLines()" class="btn-print">🖨️ Print Lines</button>
+                    <button onclick="saveAndShareLines()" class="btn-share">🔗 Save & Share Lines</button>
+                </div>
+                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 5px; font-style: italic;">
+                    💡 Print for paper copies or share with a unique URL
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1133,7 +1202,7 @@
                 return;
             }
             
-            const response = await fetch('/api/players', {
+            const response = await fetch('/api/players/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
