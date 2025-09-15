@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            <title>Line Walrus - FINAL TEST</title>
+            <title>Line Walrus - Hockey Line Management</title>
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1665,7 +1665,7 @@
                                     cursor: pointer;
                                     font-weight: bold;
                                 ">📋 Copy URL</button>
-                                <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="
+                                <button onclick="closeShareModal()" style="
                                     background: #6c757d;
                                     color: white;
                                     border: none;
@@ -1684,6 +1684,13 @@
             } catch (error) {
                 console.error('Error saving lines:', error);
                 alert('Error saving lines. Please try again.');
+            }
+        }
+
+        function closeShareModal() {
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                modal.remove();
             }
         }
 
