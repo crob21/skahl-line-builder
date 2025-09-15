@@ -1,6 +1,7 @@
 import sqlite3
 import json 
 import os
+import sys
 from datetime import datetime
 from typing import List, Dict, Optional
 
@@ -9,8 +10,12 @@ try:
     import psycopg2
     from psycopg2.extras import RealDictCursor
     PSYCOPG2_AVAILABLE = True
-except ImportError:
+    print(f"✅ psycopg2 imported successfully: {psycopg2.__version__}")
+except ImportError as e:
     PSYCOPG2_AVAILABLE = False
+    print(f"❌ psycopg2 import failed: {e}")
+    print(f"🔍 Python path: {sys.path}")
+    print(f"🔍 Installed packages: {[p for p in sys.modules.keys() if 'psycopg' in p]}")
 
 class Database:
     def __init__(self, db_path: str = "data/line_walrus.db"):
