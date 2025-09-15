@@ -2350,6 +2350,28 @@
             }
         }
 
+        function setPlayerInLine(playerId, lineNum, position) {
+            return fetch('/api/lines/set-player', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    player_id: playerId,
+                    line_num: lineNum,
+                    position: position
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    loadLines();
+                    loadPlayers();
+                    return result;
+                } else {
+                    throw new Error(result.message);
+                }
+            });
+        }
+
         function showFeedback(message, type) {
             // Create feedback element
             const feedback = document.createElement('div');
