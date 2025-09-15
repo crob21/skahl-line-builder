@@ -37,6 +37,97 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
+            position: relative;
+        }
+        
+        .help-btn {
+            background: #3b82f6;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute;
+            right: 0;
+        }
+        
+        .help-btn:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .help-icon {
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .help-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .help-modal h2 {
+            color: #1e40af;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .help-step {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .help-step h3 {
+            color: #1e40af;
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+        }
+        
+        .help-step p {
+            margin: 5px 0;
+            color: #374151;
+        }
+        
+        .help-close {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+            margin-top: 20px;
+        }
+        
+        .help-close:hover {
+            background: #5a6268;
         }
         
         .logo {
@@ -858,6 +949,9 @@
                 <img src="/static/images/line-walrus-logo.png" alt="Line Walrus Logo">
             </div>
             Line Walrus
+            <button onclick="showHelpModal()" class="help-btn" title="Get Help">
+                <span class="help-icon">❓</span>
+            </button>
         </h1>
         <p class="tagline">Because Even a Walrus Can Manage Lines Better</p>
         
@@ -1689,6 +1783,65 @@
 
         function closeShareModal() {
             const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function showHelpModal() {
+            const modal = document.createElement('div');
+            modal.className = 'help-modal';
+            modal.innerHTML = `
+                <div class="help-modal-content">
+                    <h2>🦭 How to Use Line Walrus</h2>
+                    
+                    <div class="help-step">
+                        <h3>📥 For SKAHL Teams - Quick Start</h3>
+                        <p><strong>1. Export from SportNinja:</strong> Download your roster as a CSV file</p>
+                        <p><strong>2. Upload CSV:</strong> Click "📁 Upload CSV" and select your file</p>
+                        <p><strong>3. Save Team:</strong> Enter a team name and click "💾 Save Team"</p>
+                        <p><strong>4. Build Lines:</strong> Drag players to line positions or use mobile tap-to-select</p>
+                        <p><strong>5. Share Lines:</strong> Click "🔗 Save & Share Lines" to get a shareable URL</p>
+                    </div>
+                    
+                    <div class="help-step">
+                        <h3>🖥️ Desktop Usage</h3>
+                        <p><strong>Drag & Drop:</strong> Drag players from bench/spares to line positions</p>
+                        <p><strong>Remove Players:</strong> Click the "×" button on any player card</p>
+                        <p><strong>Clear Lines:</strong> Use "Clear Line" buttons to empty specific lines</p>
+                    </div>
+                    
+                    <div class="help-step">
+                        <h3>📱 Mobile Usage</h3>
+                        <p><strong>Tap to Select:</strong> Tap a player to select them (turns blue)</p>
+                        <p><strong>Tap to Place:</strong> Tap a position slot to place the selected player</p>
+                        <p><strong>Visual Feedback:</strong> Selected players are highlighted in blue</p>
+                    </div>
+                    
+                    <div class="help-step">
+                        <h3>💾 Team Management</h3>
+                        <p><strong>Load Teams:</strong> Select from saved teams and click "📂 Load Team"</p>
+                        <p><strong>Update Teams:</strong> Use "🔄 Update Team" to save current changes</p>
+                        <p><strong>Delete Teams:</strong> Use "🗑️ Delete Team" to remove saved teams</p>
+                        <p><strong>Download:</strong> Export your current roster as CSV</p>
+                    </div>
+                    
+                    <div class="help-step">
+                        <h3>🖨️ Printing & Sharing</h3>
+                        <p><strong>Print Lines:</strong> Click "🖨️ Print Lines" for a printable version</p>
+                        <p><strong>Share Lines:</strong> Save lines with a name to get a shareable URL</p>
+                        <p><strong>View Shared:</strong> Anyone with the URL can view your lines</p>
+                    </div>
+                    
+                    <button class="help-close" onclick="closeHelpModal()">Close</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function closeHelpModal() {
+            const modal = document.querySelector('.help-modal');
             if (modal) {
                 modal.remove();
             }
